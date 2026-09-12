@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的个人博客</title>
+<!-- 引入 APlayer 样式 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<style>
+  /* 全局样式 */
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+    padding-bottom: 80px; /* 为底部播放器留出空间 */
+  }
+  header {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  nav h1 {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+  }
+  nav a:hover {
+    color: #0070f3;
+  }
+  main {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  .profile {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .profile img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .profile h2 {
+    margin: 1rem 0 0.5rem;
+  }
+  .profile p {
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .posts {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .post-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  }
+  .post-card h3 {
+    margin-top: 0;
+    color: #0070f3;
+  }
+  .post-card .date {
+    font-size: 0.875rem;
+    color: #999;
+    margin-bottom: 0.5rem;
+  }
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-size: 0.875rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <h1>我的博客</h1>
+    <ul>
+      <li><a href="#">首页</a></li>
+      <li><a href="#">关于</a></li>
+      <li><a href="#">归档</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section class="profile">
+    <!-- 替换为你自己的头像图片地址，或使用本地图片 -->
+    <img src="https://via.placeholder.com/120" alt="头像">
+    <h2>你好，我是博主</h2>
+    <p>欢迎来到我的个人博客。这里记录我的学习笔记、生活感悟和创作分享。</p>
+  </section>
+
+  <section class="posts">
+    <article class="post-card">
+      <h3>我的第一篇文章</h3>
+      <div class="date">2025-01-01</div>
+      <p>这是文章摘要。你可以在这里写一些介绍，然后点击阅读全文。</p>
+    </article>
+    <article class="post-card">
+      <h3>如何使用 GitHub Pages 搭建博客</h3>
+      <div class="date">2025-01-02</div>
+      <p>简单记录一下搭建过程，方便以后查阅。</p>
+    </article>
+    <article class="post-card">
+      <h3>无版权音乐推荐</h3>
+      <div class="date">2025-01-03</div>
+      <p>分享一些可以免费使用的音乐资源，避免侵权风险。</p>
+    </article>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 我的博客. Powered by GitHub Pages.</p>
+</footer>
+
+<!-- 音乐播放器容器 -->
+<div id="aplayer"></div>
+
+<!-- 引入 APlayer 脚本 -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<script>
+  // 初始化 APlayer
+  const ap = new APlayer({
+    element: document.getElementById('aplayer'),
+    fixed: true,       // 固定在底部
+    mini: true,        // 迷你模式，点击可展开歌单
+    autoplay: false,   // 不自动播放（浏览器会阻止自动播放声音）
+    theme: '#0070f3',  // 主题色
+    loop: 'all',       // 循环模式：all, one, none
+    order: 'list',     // 播放顺序：list, random
+    preload: 'auto',
+    volume: 0.7,
+    mutex: true,       // 互斥，防止多个播放器同时播放
+    listFolded: false, // 歌单是否折叠
+    listMaxHeight: 300, // 歌单最大高度
+    music: [
+      {
+        title: '示例歌曲 1',
+        author: '艺术家 1',
+        url: 'music/song1.mp3',   // 替换为你的音乐文件路径
+        pic: 'music/cover1.jpg',  // 替换为封面图片路径
+        lrc: ''                   // 可选，歌词文件路径
+      },
+      {
+        title: '示例歌曲 2',
+        author: '艺术家 2',
+        url: 'music/song2.mp3',
+        pic: 'music/cover2.jpg',
+        lrc: ''
+      }
+      // 可以继续添加更多歌曲，格式相同
+    ]
+  });
+</script>
+
+</body>
+</html>
