@@ -206,6 +206,8 @@ body {
   margin: 0 0 16px;
   font-weight: 600;
   letter-spacing: 0.03em;
+  /* pre-line：让 data.js 里美句中的 \n 真的换行，长句才能分几行站住 */
+  white-space: pre-line;
   color: var(--ink-warm);
   text-shadow: 0 2px 20px rgba(255, 252, 244, 0.95),
     0 1px 4px rgba(255, 252, 244, 0.95);

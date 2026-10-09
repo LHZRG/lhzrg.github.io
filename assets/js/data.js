@@ -106,15 +106,15 @@ const QUOTES = [
     by: "—— 何意味",
   },
   {
-    text: "Execute正在执行cute.exe（可爱执行程序）",
+    text: "Execute正在执行cute.exe\n（可爱执行程序）",
     by: "—— Execute",
   },
   {
-    text: "如果有人对你发“我喜欢你”，你也对ta发“我喜欢你”，那么两个人的意思就是，你喜欢我，我喜欢你。",
+    text: "如果有人对你发“我喜欢你”，\n你也对ta发“我喜欢你”，\n那么两个人的意思就是，\n你喜欢我，我喜欢你。",
     by: "—— LHZRG",
   },
   {
-    text: "我梦见我在天上飞，从古一路飞到今，从日一直飞到月。",
+    text: "我梦见我在天上飞，\n从古一路飞到今，\n从日一直飞到月。",
     by: "—— 白礼桦",
   },
   {
@@ -480,14 +480,27 @@ const GALLERY = [
 /* ============================================================================
    第 5 段 · 友情链接 LINKS
    ---------------------------------------------------------------------------
-   ★ 加一个友链：复制下面任意一组，改四个字段：
-       name    —— 对方站名
-       desc    —— 一句话介绍
-       url     —— 对方网址（要写全 https://）
-       color   —— 头像底色，随意挑。给几个现成的：
-                  #c98f4e 琥珀 #7e8f58 橄榄 #a97c4e 榛木 #b8695a 陶土
-                  #6f7f8f 雾蓝 #8a6f9f 紫灰 #5f8a86 松绿 #c2708a 干玫瑰
-       initial —— 头像上的字，一般取站名第一个字或一个字母
+   ★ 加一个友链：复制下面任意一组，改这些字段：
+       name      —— 对方站名（卡片上、弹窗标题都用它）
+       desc      —— 一句话介绍（卡片上的小字）
+       url       —— 对方网址（要写全 https://）
+       color     —— 头像底色，随意挑。给几个现成的：
+                     #c98f4e 琥珀 #7e8f58 橄榄 #a97c4e 榛木 #b8695a 陶土
+                     #6f7f8f 雾蓝 #8a6f9f 紫灰 #5f8a86 松绿 #c2708a 干玫瑰
+       initial   —— 头像上的字，一般取站名第一个字或一个字母
+
+     ↓↓↓ 以下四项是「点开卡片后那个大弹窗」里的内容 ↓↓↓
+       snap      —— 站点快照图：截一张对方首页的图，放进 assets/img/ ，
+                    这里写路径，例如 "assets/img/snap-myfriend.jpg"。
+                    先不填也行，会显示一个虚线占位框，不影响其他部分。
+       snapDate  —— 快照日期，写在快照图下方，如 "2026-10-09"
+       owner     —— 站长昵称（不填就不显示这一行）
+       review    —— 你对这个站 / 这位站长的评价，可以写长一点，
+                    弹窗右侧主要就靠它撑场面。想换行就分成多个字符串。
+       tags      —— 站点标签，写几个词，显示成小圆角标签
+       known     —— 什么时候认识的 / 加上的，如 "2026-09"
+       status    —— 站点状态，如 "常来常新" / "偶尔断线" / "安静更新"
+
    ★ 删一个：删掉那一整组 { } 即可。首页只显示前 4 个，友链页显示全部。
    ============================================================================ */
 const LINKS = [
@@ -497,6 +510,16 @@ const LINKS = [
     url: "https://example.com", // ← 改：换成真实网址
     color: "#c98f4e",
     initial: "午",
+    snap: "assets/img/snap-placeholder.jpg", // ← 改：换成对方首页的截图
+    snapDate: "2026-10-09",
+    owner: "阿岸",
+    review: [
+      "最早是在一篇讲「窗朝向」的文章里找到他的，读完顺手把整站翻了一遍。",
+      "他写字不着急，一篇里常常只有三张图，每张都值得盯着看一会儿。",
+    ],
+    tags: ["建筑", "光影", "慢更新"],
+    known: "2026-03",
+    status: "常来常新",
   },
   {
     name: "木与纸",
@@ -504,6 +527,13 @@ const LINKS = [
     url: "https://example.com",
     color: "#7e8f58",
     initial: "木",
+    snap: "assets/img/snap-placeholder.jpg",
+    snapDate: "2026-10-09",
+    owner: "木与纸",
+    review: ["看他把一块木头慢慢磨成书签的那期视频，我暂停了六次。", "手很稳，话很少，背景音只有刨花落地的声音。"],
+    tags: ["手作", "木工", "视频"],
+    known: "2026-04",
+    status: "常来常新",
   },
   {
     name: "Slow Cafe",
@@ -511,6 +541,13 @@ const LINKS = [
     url: "https://example.com",
     color: "#a97c4e",
     initial: "S",
+    snap: "assets/img/snap-placeholder.jpg",
+    snapDate: "2026-10-09",
+    owner: "Slow",
+    review: ["器具测评写得像实验报告，但结尾总会补一句「好喝就行，别太较真」。"],
+    tags: ["咖啡", "器具", "评测"],
+    known: "2026-05",
+    status: "安静更新",
   },
   {
     name: "胶片日记",
@@ -518,6 +555,13 @@ const LINKS = [
     url: "https://example.com",
     color: "#b8695a",
     initial: "胶",
+    snap: "assets/img/snap-placeholder.jpg",
+    snapDate: "2026-10-09",
+    owner: "小满",
+    review: ["坚持不后期，扫描直出。看久了会觉得那些偏色才是生活本来的颜色。"],
+    tags: ["胶片", "摄影", "一月一卷"],
+    known: "2026-06",
+    status: "常来常新",
   },
   {
     name: "一个人的城市",
@@ -525,6 +569,13 @@ const LINKS = [
     url: "https://example.com",
     color: "#6f7f8f",
     initial: "城",
+    snap: "assets/img/snap-placeholder.jpg",
+    snapDate: "2026-10-09",
+    owner: "路人甲",
+    review: ["按他的路线走过一次，才发现我住了五年的街区里有那么多没见过的转角。"],
+    tags: ["散步", "城市", "地图"],
+    known: "2026-07",
+    status: "偶尔断线",
   },
   {
     name: "写代码的风",
@@ -532,6 +583,13 @@ const LINKS = [
     url: "https://example.com",
     color: "#8a6f9f",
     initial: "码",
+    snap: "assets/img/snap-placeholder.jpg",
+    snapDate: "2026-10-09",
+    owner: "风",
+    review: ["技术文里最难得的一种：说清楚「为什么不做」，而不只是「怎么做」。"],
+    tags: ["前端", "折腾", "工具"],
+    known: "2026-08",
+    status: "常来常新",
   },
 ];
 

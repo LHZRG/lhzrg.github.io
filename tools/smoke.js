@@ -15,19 +15,22 @@ const DATA = (() => {
       require("path").join(__dirname, "..", "assets", "js", "data.js"),
       "utf8"
     );
-    eval(src.replace(/^const /gm, "var ")); // const 换成 var 才能被这里读到
+    // 用 new Function 包一层，比 eval + 替换 const 更稳（也不会误伤文件内容）
+    const D = new Function(
+      src + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS});"
+    )();
     const tags = new Set();
-    POSTS.forEach((p) => (p.tags || []).forEach((t) => tags.add(t)));
+    D.POSTS.forEach((p) => (p.tags || []).forEach((t) => tags.add(t)));
     return {
       ok: true,
-      posts: POSTS.length,
+      posts: D.POSTS.length,
       tags: tags.size,
-      gallery: GALLERY.length,
-      links: LINKS.length,
-      skills: SKILLS.length,
-      timeline: TIMELINE.length,
-      now: NOW.length,
-      socials: SITE.socials.length,
+      gallery: D.GALLERY.length,
+      links: D.LINKS.length,
+      skills: D.SKILLS.length,
+      timeline: D.TIMELINE.length,
+      now: D.NOW.length,
+      socials: D.SITE.socials.length,
     };
   } catch (e) {
     console.log("❌ data.js 读不了：" + e.message + "\n   先把 data.js 修好再跑测试。\n");
@@ -58,7 +61,20 @@ const PAGES = [
     ["个人介绍", d.querySelector("#profile").textContent.trim().length > 50, true],
     ["此刻卡片", d.querySelectorAll("#nowGrid .now-card").length, DATA.now],
     ["首页友链", d.querySelectorAll("#homeLinks .link-card").length, Math.min(4, DATA.links)],
-  ]],
+  ], async (d, w) => {
+    /* 首页的友链卡片也应该弹出同一个详情窗格 */
+    const card = d.querySelector("#homeLinks .link-card[data-i]");
+    const modal = d.querySelector("#linkModal");
+    card.dispatchEvent(new w.MouseEvent("click", { bubbles: true, cancelable: true }));
+    await sleep(120);
+    const out = [
+      ["首页点友链也弹窗", modal.classList.contains("open"), true],
+      ["弹的是这张卡的内容", d.querySelector("#lmName").textContent.trim().length > 0, true],
+    ];
+    modal.dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+    await sleep(100);
+    return out;
+  }],
   ["blog.html", (d) => [
     ["文章卡总数", d.querySelectorAll("#postGrid .post-card").length, DATA.posts],
     ["标签按钮(全部+去重标签)", d.querySelectorAll("#tagBar .filter-chip").length, DATA.tags + 1],
@@ -81,8 +97,41 @@ const PAGES = [
   ]],
   ["links.html", (d) => [
     ["友链卡片", d.querySelectorAll("#linkGrid .link-card").length, DATA.links],
+    ["卡片都带下标", d.querySelectorAll("#linkGrid .link-card[data-i]").length, DATA.links],
+    ["悬停箭头", d.querySelectorAll("#linkGrid .link-peek").length, DATA.links],
+    ["弹窗容器", d.querySelector("#linkModal") !== null, true],
     ["邮箱按钮", d.querySelector("#mailBtn").textContent.includes("@"), true],
-  ]],
+  ], async (d, w) => {
+    /* 模拟点开第一个友链卡片，检查弹窗是否正确填充，再测关闭 */
+    const out = [];
+    const card = d.querySelector("#linkGrid .link-card[data-i]");
+    const modal = d.querySelector("#linkModal");
+    card.dispatchEvent(new w.MouseEvent("click", { bubbles: true, cancelable: true }));
+    await sleep(120);
+    out.push(["点卡片后弹窗打开", modal.classList.contains("open"), true]);
+    out.push(["背景锁定滚动", d.body.style.overflow, "hidden"]);
+    out.push(["站名已填入", d.querySelector("#lmName").textContent.trim().length > 0, true]);
+    out.push(["快照区有图或占位", d.querySelector("#lmShot").children.length > 0, true]);
+    out.push(["评价已渲染", d.querySelectorAll("#lmReview p").length > 0, true]);
+    out.push(["跳转按钮有链接", /^https?:/.test(d.querySelector("#lmGo").getAttribute("href") || ""), true]);
+    // 点窗格外 → 关闭
+    modal.dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+    await sleep(120);
+    out.push(["点窗外可关闭", modal.classList.contains("open"), false]);
+    // 再开一次，测 ESC
+    card.dispatchEvent(new w.MouseEvent("click", { bubbles: true, cancelable: true }));
+    await sleep(120);
+    d.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await sleep(120);
+    out.push(["ESC 可关闭", modal.classList.contains("open"), false]);
+    // 再开一次，测右上角叉号
+    card.dispatchEvent(new w.MouseEvent("click", { bubbles: true, cancelable: true }));
+    await sleep(120);
+    d.querySelector(".lm-x").dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+    await sleep(120);
+    out.push(["叉号可关闭", modal.classList.contains("open"), false]);
+    return out;
+  }],
   ["about.html", (d) => [
     ["技能条", d.querySelectorAll("#skillList .skill").length, DATA.skills],
     ["时间轴", d.querySelectorAll("#timeline .tl-item").length, DATA.timeline],
@@ -97,7 +146,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 (async () => {
   let fail = 0;
-  for (const [page, checks] of PAGES) {
+  for (const [page, checks, interact] of PAGES) {
     const errors = [];
     const vc = new VirtualConsole();
     vc.on("jsdomError", (e) => errors.push(e.message));
@@ -129,7 +178,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       fail++;
       errors.forEach((e) => console.log(`   ✗ 运行时错误: ${e.slice(0, 200)}`));
     }
-    for (const [name, got, want] of checks(d)) {
+    const staticChecks = checks(d);
+    const liveChecks = interact ? await interact(d, dom.window) : [];
+    for (const [name, got, want] of [...staticChecks, ...liveChecks]) {
       const ok = got === want || (want === true && got === true);
       if (!ok) fail++;
       console.log(`   ${ok ? "✓" : "✗"} ${name}: ${got}${ok ? "" : `  (期望 ${want})`}`);

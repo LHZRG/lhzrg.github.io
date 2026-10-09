@@ -8,7 +8,7 @@
        友情链接                   → LINKS
  */
 (() => {
-  const { lightbox } = App.init("home.html");
+  const { lightbox, linkModal } = App.init("home.html");
 
   /* Hero */
   document.getElementById("heroImg").src = SITE.heroImage;
@@ -98,14 +98,24 @@
   });
 
   /* 友链（首页取前 4）
-     ★改这里：想在首页多显示几个邻居，改下面 LINKS.slice(0, 4) 的数字 */
-  const linkCard = (l) => `
-    <a class="link-card reveal" href="${App.esc(l.url)}" target="_blank" rel="noopener">
+     ★改这里：想在首页多显示几个邻居，改下面 LINKS.slice(0, 4) 的数字
+     点卡片会弹出详情窗格（和友链页一样），不直接跳转 */
+  const linkCard = (l, i) => `
+    <a class="link-card reveal" href="${App.esc(l.url)}" target="_blank" rel="noopener" data-i="${i}">
       <span class="link-status"></span>
       <span class="link-ava" style="background:${App.esc(l.color)}">${App.esc(l.initial)}</span>
       <span class="link-info"><b>${App.esc(l.name)}</b><span>${App.esc(l.desc)}</span></span>
+      <span class="link-peek" aria-hidden="true">→</span>
     </a>`;
-  document.getElementById("homeLinks").innerHTML = LINKS.slice(0, 4).map(linkCard).join("");
+  const homeLinkList = LINKS.slice(0, 4);
+  document.getElementById("homeLinks").innerHTML = homeLinkList.map(linkCard).join("");
+  document.getElementById("homeLinks").addEventListener("click", (e) => {
+    const card = e.target.closest(".link-card[data-i]");
+    if (!card) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    linkModal.open(homeLinkList[Number(card.dataset.i)]);
+  });
 
   App.reveal();
 })();

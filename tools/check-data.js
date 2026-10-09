@@ -107,7 +107,21 @@ LINKS.forEach((l, i) => {
   if (!isStr(l.name)) P(`LINKS 第 ${i + 1} 个缺 name`);
   if (!isStr(l.url)) P(`LINKS 第 ${i + 1} 个缺 url`);
   else if (!/^https?:\/\//.test(l.url)) W(`LINKS 第 ${i + 1} 个网址不完整（要带 https://）：${l.url}`);
-  if (!isStr(l.desc)) W(`LINKS 第 ${i + 1} 个没写 desc`);
+  if (!isStr(l.desc)) W(`LINKS 第 ${i + 1} 个没写 desc（卡片上的一行小字）`);
+  if (!isStr(l.initial)) W(`LINKS 第 ${i + 1} 个没写 initial（头像上那个字）`);
+  if (!isStr(l.color) || !/^#[0-9a-fA-F]{3,8}$/.test(String(l.color)))
+    W(`LINKS 第 ${i + 1} 个的 color 不像颜色值：${l.color}`);
+  // 弹窗用到的字段
+  if (l.snap && !/^https?:/.test(l.snap) && !fileOK(l.snap)) P(`LINKS 第 ${i + 1} 个的快照图不存在：${l.snap}`);
+  if (!l.snap) W(`LINKS 第 ${i + 1} 个还没放快照（弹窗左侧会显示虚线占位框）`);
+  if (l.review && !Array.isArray(l.review) && typeof l.review !== "string")
+    P(`LINKS 第 ${i + 1} 个的 review 只能是文字或文字数组`);
+  if (!l.review) W(`LINKS 第 ${i + 1} 个还没写评价 review（弹窗右侧会空着）`);
+  if (l.snapDate && !/^\d{4}-\d{2}-\d{2}$/.test(l.snapDate))
+    W(`LINKS 第 ${i + 1} 个的 snapDate 建议写成 2026-10-09 这种格式：${l.snapDate}`);
+  if (l.tags && !Array.isArray(l.tags)) W(`LINKS 第 ${i + 1} 个的 tags 不是 [ ] 数组`);
+  const revLen = Array.isArray(l.review) ? l.review.join("").length : (l.review || "").length;
+  console.log("   " + String(l.name).padEnd(12) + (l.snap ? "有快照" : "无快照") + "  评价 " + String(revLen).padStart(3) + " 字");
 });
 
 /* ---------- TIMELINE / NOW / SKILLS ---------- */

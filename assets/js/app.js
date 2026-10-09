@@ -316,7 +316,132 @@ const App = (() => {
     };
   }
 
-  /* ---------- ⑦ 回到顶部按钮 + 顶部阅读进度条 ---------- */
+  /* ---------- ⑦ 友链详情弹窗（点击友链卡片时弹出） ----------
+     左侧：站点快照 + 快照日期
+     右侧：站名 / 站长 / 评价 / 标签 / 认识时间 / 状态
+     底部：「点击跳转」按钮
+     关闭：点窗格外、点右上角叉、按 ESC
+     数据结构见 data.js 第 5 段 LINKS
+  ------------------------------------------------------------------ */
+  function mountLinkModal() {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div class="link-modal" id="linkModal" role="dialog" aria-modal="true" aria-label="友链详情">
+        <div class="lm-panel">
+          <button class="lm-x" type="button" aria-label="关闭">✕</button>
+
+          <div class="lm-shot">
+            <div class="lm-chrome">
+              <span class="lm-dots"><i></i><i></i><i></i></span>
+              <span class="lm-url"></span>
+            </div>
+            <div class="lm-shotimg" id="lmShot"></div>
+            <div class="lm-snapdate" id="lmSnapDate"></div>
+          </div>
+
+          <div class="lm-body">
+            <div class="lm-head">
+              <span class="link-ava" id="lmAva"></span>
+              <div class="lm-headtxt">
+                <h3 id="lmName"></h3>
+                <div class="lm-owner" id="lmOwner"></div>
+              </div>
+            </div>
+
+            <p class="lm-label">我的评价</p>
+            <div class="lm-review" id="lmReview"></div>
+
+            <div class="lm-tags" id="lmTags"></div>
+
+            <dl class="lm-meta" id="lmMeta"></dl>
+
+            <div class="lm-foot">
+              <a class="btn lm-go" id="lmGo" href="#" target="_blank" rel="noopener">
+                <span>点击跳转</span><i>→</i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>`
+    );
+
+    const modal = $("#linkModal");
+    let lastFocus = null;
+
+    const close = () => {
+      modal.classList.remove("open");
+      document.body.style.overflow = "";
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    };
+
+    modal.addEventListener("click", (e) => {
+      // 点窗格外的暗色区域才关闭；点窗格内部不关
+      if (!e.target.closest(".lm-panel")) close();
+    });
+    $(".lm-x", modal).onclick = close;
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("open")) close();
+    });
+
+    function open(l) {
+      lastFocus = document.activeElement;
+
+      // 网址：去掉协议头，显示更干净
+      const pretty = String(l.url || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+      $(".lm-url", modal).textContent = pretty;
+      $("#lmGo", modal).href = l.url || "#";
+
+      // 快照：没填 snap 就显示一个虚线占位框
+      const shot = $("#lmShot", modal);
+      shot.innerHTML = l.snap
+        ? `<img src="${esc(l.snap)}" alt="${esc(l.name)} 的首页快照" loading="lazy">`
+        : `<div class="lm-noshot"><b>还没有快照</b><span>截图后填进 data.js 的 snap 字段</span></div>`;
+      shot.classList.toggle("is-empty", !l.snap);
+
+      $("#lmSnapDate", modal).innerHTML = l.snapDate
+        ? `快照于 <b>${esc(l.snapDate)}</b>`
+        : "";
+
+      // 头像
+      const ava = $("#lmAva", modal);
+      ava.textContent = l.initial || (l.name || "?").slice(0, 1);
+      ava.style.background = l.color || "var(--wood-500)";
+
+      $("#lmName", modal).textContent = l.name || "未命名";
+      $("#lmOwner", modal).innerHTML = l.owner ? `站长 · ${esc(l.owner)}` : "";
+
+      // 评价：支持字符串或字符串数组
+      const rev = Array.isArray(l.review) ? l.review : l.review ? [l.review] : [];
+      $("#lmReview", modal).innerHTML = rev.length
+        ? rev.map((t) => `<p>${esc(t)}</p>`).join("")
+        : `<p class="lm-muted">${esc(l.desc || "还没写评价。")}</p>`;
+
+      // 标签
+      const tags = Array.isArray(l.tags) ? l.tags : [];
+      $("#lmTags", modal).innerHTML = tags
+        .map((t) => `<span class="chip">${esc(t)}</span>`)
+        .join("");
+
+      // 右侧下方的小信息表
+      const meta = [
+        ["网址", l.url ? `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(pretty)}</a>` : ""],
+        ["认识于", l.known],
+        ["状态", l.status ? `<span class="lm-state"><i></i>${esc(l.status)}</span>` : ""],
+      ].filter(([, v]) => v);
+      $("#lmMeta", modal).innerHTML = meta
+        .map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`)
+        .join("");
+
+      document.body.style.overflow = "hidden";
+      modal.classList.add("open");
+      // 让动画从点击处稍微展开的感觉：把焦点交给关闭按钮，键盘用户也好操作
+      $(".lm-x", modal).focus?.();
+    }
+
+    return { open, close };
+  }
+
+  /* ---------- ⑧ 回到顶部按钮 + 顶部阅读进度条 ---------- */
   function mountToTop() {
     document.body.insertAdjacentHTML(
       "beforeend",
@@ -390,6 +515,7 @@ const App = (() => {
     mountSearch();
     mountToTop();
     const lb = mountLightbox();
+    const linkModal = mountLinkModal();
     reveal();
     document.addEventListener("click", (e) => {
       const c = e.target.closest(".copy-code");
@@ -402,7 +528,7 @@ const App = (() => {
         );
       }
     });
-    return { lightbox: lb };
+    return { lightbox: lb, linkModal };
   }
 
   return {
