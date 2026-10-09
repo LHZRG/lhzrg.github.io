@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>语林集</title>
+    <link>https://yourname.github.io/yulinji/</link>
+    <description>午后斜阳里的一间小馆。写字、拍照、慢慢生活。</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 28 Sep 2026 12:00:00 +0800</lastBuildDate>
+    <atom:link href="https://yourname.github.io/yulinji/rss.xml" rel="self" type="application/rss+xml" />
+
+    <item>
+      <title>下午三点的光，是最好的滤镜</title>
+      <link>https://yourname.github.io/yulinji/post.html?id=afternoon-light</link>
+      <guid>https://yourname.github.io/yulinji/post.html?id=afternoon-light</guid>
+      <pubDate>Mon, 28 Sep 2026 12:00:00 +0800</pubDate>
+      <description>同一个窗台，我拍了整整一年。后来发现，决定照片好不好看的从来不是相机，而是你愿意等的那两个小时。</description>
+    </item>
+
+    <item>
+      <title>一间原木书房的自白</title>
+      <link>https://yourname.github.io/yulinji/post.html?id=wooden-study</link>
+      <guid>https://yourname.github.io/yulinji/post.html?id=wooden-study</guid>
+      <pubDate>Sat, 12 Sep 2026 12:00:00 +0800</pubDate>
+      <description>预算八千，面积九平米。没有设计师，没有效果图，只有一把卷尺和很多个周末。</description>
+    </item>
+
+    <item>
+      <title>手冲一杯，把清晨拉长</title>
+      <link>https://yourname.github.io/yulinji/post.html?id=slow-coffee</link>
+      <guid>https://yourname.github.io/yulinji/post.html?id=slow-coffee</guid>
+      <pubDate>Sun, 30 Aug 2026 12:00:00 +0800</pubDate>
+      <description>从撕开包装到喝完最后一口，一共十四分钟。这十四分钟里，我不看手机。</description>
+    </item>
+
+    <item>
+      <title>我用三个周末，搭了自己的小博客</title>
+      <link>https://yourname.github.io/yulinji/post.html?id=build-blog</link>
+      <guid>https://yourname.github.io/yulinji/post.html?id=build-blog</guid>
+      <pubDate>Sat, 15 Aug 2026 12:00:00 +0800</pubDate>
+      <description>不装依赖、不用构建工具、不花钱托管。纯静态页面 + GitHub Pages。</description>
+    </item>
+
+    <item>
+      <title>关于“慢”的一百种练习</title>
+      <link>https://yourname.github.io/yulinji/post.html?id=practice-slow</link>
+      <guid>https://yourname.github.io/yulinji/post.html?id=practice-slow</guid>
+      <pubDate>Mon, 20 Jul 2026 12:00:00 +0800</pubDate>
+      <description>慢不是速度问题，是注意力放在哪儿的问题。</description>
+    </item>
+
+    <item>
+      <title>猫在光里，什么都不用做</title>
+      <link>https://yourname.github.io/yulinji/post.html?id=cat-in-light</link>
+      <guid>https://yourname.github.io/yulinji/post.html?id=cat-in-light</guid>
+      <pubDate>Mon, 08 Jun 2026 12:00:00 +0800</pubDate>
+      <description>它每天下午都要占领地板上那块方形的光。</description>
+    </item>
+  </channel>
+</rss>

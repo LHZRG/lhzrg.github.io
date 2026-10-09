@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>友链 · 语林集</title>
+    <meta name="description" content="隔壁邻居们，都是有意思的小站。" />
+    <meta name="theme-color" content="#f7f1e6" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c99a63'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23fff8ec' font-family='serif'%3E语%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+  <body>
+    <div id="nav"></div>
+
+    <!-- ============================================================
+         「友链」页
+         中间的友链卡片全部来自 data.js 的 LINKS（第 5 段），本文件不用改。
+         下面 ★改这里 的几条是「申请友链」那张说明卡的文字。
+         ============================================================ -->
+    <main style="padding-top: 46px">
+      <div class="wrap">
+        <div class="divider-leaf" style="margin-top: 10px">隔 壁 邻 居</div><!-- ★改这里：栏目标题 -->
+        <div class="sec-head">
+          <div>
+            <h2 class="sec-title">友情链接</h2><!-- ★改这里：标题 -->
+            <p style="color: var(--ink-3); font-size: 14px; margin: 6px 0 0">
+              共 <b id="linkNum">0</b> 位邻居 · 都是些安静又认真的小站<!-- ★改这里：副标题（数量会自动填） -->
+            </p>
+          </div>
+          <button class="more-link" id="randLink">🎲 随机串门</button><!-- ★改这里：右上角按钮文字 -->
+        </div>
+
+        <div class="link-grid" id="linkGrid"></div><!-- ← 友链卡片，数据在 data.js 的 LINKS -->
+
+        <div class="divider-leaf" id="apply">申 请 友 链</div><!-- ★改这里：栏目标题（页脚「申请友链」链接指向这里的 id="apply"，改名记得同步） -->
+        <div class="note-card">
+          <h3>想交换链接？</h3><!-- ★改这里：卡片标题 -->
+          <p>欢迎。我的要求很简单：</p><!-- ★改这里：开场白 -->
+          <ul>
+            <!-- ★改这里：你的友链条件，随便增删条目 -->
+            <li>站点还在正常更新（半年内有过更新就行）</li>
+            <li>内容是自己写的，不是采集站</li>
+            <li>没有弹窗广告和强制跳转</li>
+          </ul>
+          <p style="margin-top: 14px">按下面这个格式发给我就行：</p>
+          <pre style="margin: 10px 0 16px"><code>name: 站点名称
+url: https://example.com
+desc: 一句话介绍
+avatar: 头像地址（可选）</code></pre><!-- ★改这里：希望对方发给你的申请格式 -->
+          <a class="btn" id="mailBtn" href="#">✉ 复制我的邮箱</a><!-- 按钮上的邮箱读的是 data.js 里 SITE.socials 的邮箱那项 -->
+          <p style="font-size: 13px; color: var(--ink-3); margin: 12px 0 0">
+            加上之后我会在一周内回访，如果哪天你的站打不开了，我会先留着，等你回来。<!-- ★改这里：末尾那句话 -->
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/markdown.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/pages/links.js"></script>
+  </body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>文章 · 语林集</title>
+    <meta name="description" content="语林集的全部文章。" />
+    <meta name="theme-color" content="#f7f1e6" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c99a63'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23fff8ec' font-family='serif'%3E语%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+  <body>
+    <div id="nav"></div>
+
+    <!-- ============================================================
+         「文章」列表页
+         卡片、标签筛选、年表全部由 data.js 的 POSTS 自动生成，本文件不用改。
+         👉 加 / 删 / 改文章：assets/js/data.js 第 3 段 POSTS
+         下面 ★改这里 的只有几处页面文案。
+         ============================================================ -->
+    <main style="padding-top: 46px">
+      <div class="wrap">
+        <div class="divider-leaf" style="margin-top: 10px">写 的 字</div><!-- ★改这里：栏目标题 -->
+        <div class="sec-head">
+          <div>
+            <h2 class="sec-title">全部文章</h2><!-- ★改这里：标题 -->
+            <p style="color: var(--ink-3); font-size: 14px; margin: 6px 0 0">
+              一共 <b id="totalNum">0</b> 篇，慢慢看，不着急。<!-- ★改这里：副标题（篇数自动填） -->
+            </p>
+          </div>
+          <div class="view-switch">
+            <button class="filter-chip on" data-view="grid">卡片</button><!-- ★改这里：卡片视图按钮名 -->
+            <button class="filter-chip" data-view="year">年表</button><!-- ★改这里：年表视图按钮名 -->
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <span id="tagBar" style="display: contents"></span><!-- ← 标签按钮自动生成，标签写在 data.js 每篇文章的 tags 里 -->
+          <label class="inline-search">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+            <input id="q" type="text" placeholder="在这一页里找找…" /><!-- ★改这里：搜索框里的提示语 -->
+          </label>
+        </div>
+
+        <div class="post-grid" id="postGrid"></div><!-- ← 卡片视图容器 -->
+        <div id="archive" hidden></div><!-- ← 年表视图容器 -->
+        <div class="empty-note" id="empty" hidden>没有找到匹配的文章，换个词试试？</div><!-- ★改这里：搜不到时显示的话 -->
+      </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/markdown.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/pages/blog.js"></script>
+  </body>
+</html>

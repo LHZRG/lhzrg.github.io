@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>关于 · 语林集</title>
+    <meta name="description" content="关于大大大椰子，和这间小馆。" />
+    <meta name="theme-color" content="#f7f1e6" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c99a63'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23fff8ec' font-family='serif'%3E语%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+  <!-- ============================================================
+       「关于」页
+       带 id 的容器由 data.js 自动填：#profile(个人介绍)、#skillList(能力条)、
+       #timeline(时间轴)、#contactRow(联系方式)。
+       👉 改这些内容去 assets/js/data.js 的第 1 段 SITE、第 6 段 TIMELINE、第 8 段 SKILLS。
+       下面 ★改这里 的是写在本文件里的说明文字。
+       ============================================================ -->
+  <body>
+    <div id="nav"></div>
+
+    <main style="padding-top: 46px">
+      <div class="wrap">
+        <div class="divider-leaf" style="margin-top: 10px">关 于 这 里</div><!-- ★改这里：栏目标题 -->
+        <div class="card profile reveal" id="profile"></div>
+
+        <div class="divider-leaf">一 点 本 事</div><!-- ★改这里：栏目标题 -->
+        <div class="card reveal" style="padding: 26px clamp(20px, 4vw, 34px)">
+          <p style="color: var(--ink-3); font-size: 14px; margin-top: 0">
+            都不精通，但都够用。数字只是自我感觉，不代表真实水平。<!-- ★改这里：能力条上方那句免责声明 -->
+          </p>
+          <div class="skill-list" id="skillList"></div><!-- 数据来自 data.js 的 SKILLS -->
+        </div>
+
+        <div class="divider-leaf">走 过 的 路</div><!-- ★改这里：栏目标题 -->
+        <div class="timeline reveal" id="timeline"></div><!-- 数据来自 data.js 的 TIMELINE -->
+
+        <div class="divider-leaf">这 间 小 馆</div><!-- ★改这里：栏目标题 -->
+        <div class="note-card reveal">
+          <h3>关于语林集</h3><!-- ★改这里：小标题 -->
+          <p>
+            <!-- ★改这里：关于本站的一段自述（可以直接改成你自己的版本） -->
+            建于 2026 年春天。没有数据库，没有后台，所有文章都存在一个叫
+            <code>data.js</code> 的文件里。加载它只有一个页面、一张图、一句好话
+            —— 我想让你在读到第一个字之前，先慢下来三秒钟。
+          </p>
+          <p style="margin-bottom: 0">
+            <!-- ★改这里：下面这段话引用了站内文章《我用三个周末…》，
+                 如果你把那篇文章删了，记得把这里的链接也一并删掉或改掉 -->
+            如果你也想搭一个类似的，源码是开放的，随便拿去改。技术细节写在
+            <a href="./post.html?id=build-blog" style="color: var(--wood-500)">《我用三个周末，搭了自己的小博客》</a>
+            里。<!-- ↑ 链接里的 id=build-blog 必须和 data.js 里那篇文章的 id 一致 -->
+          </p>
+        </div>
+
+        <div class="divider-leaf">找 到 我</div><!-- ★改这里：栏目标题 -->
+        <div class="card reveal" style="padding: 26px clamp(20px, 4vw, 34px)">
+          <p style="margin-top: 0">
+            留言最慢三天内回。如果超过一周没回，大概率是我在等一个好天气出门拍照。<!-- ★改这里：联系方式上方的说明 -->
+          </p>
+          <div class="social-row" id="contactRow"></div><!-- 数据来自 data.js 的 SITE.socials -->
+        </div>
+      </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/markdown.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/pages/about.js"></script>
+  </body>
+</html>

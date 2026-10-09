@@ -1,0 +1,455 @@
+/* ============================================================
+   语林集 · 加载页（推门前的一分钟）
+   明亮版：暖阳漫射，通透舒服
+
+   ★ 这个样式表只管「加载页」；主站的样式在 main.css
+   ★ 想改的内容对应的位置：
+       · 背景大图           → 下面 .bg 里的 url("../img/loading.jpg")
+       · 亮度 / 左侧光晕    → 下面 .veil（透明度越小越亮，详见该处注释）
+       · 美句文字样式       → 搜 .q-text / .q-by
+       · 进度条样式         → 搜 .bar
+       · 「推门而入」按钮   → 搜 .door
+       · 句子内容本身       → assets/js/data.js 的 QUOTES
+       · 站名、按钮文字     → index.html
+   ★ 下面 :root 里这几个变量是加载页专属配色，改了只影响这一页
+   ============================================================ */
+:root {
+  --warm-1: #f2e6d2; /* 页面底色（图还没出来时显示的颜色） */
+  --warm-2: #8a6242; /* 木色，用于分隔线之类 */
+  --cream: #fffaf0; /* 奶白，按钮和文字衬底 */
+  --ink-warm: #46311f; /* 正文深木色（句子、标题的颜色） */
+  --honeysolid: #e8b45f; /* 琥珀色，进度条和「推门而入」按钮的颜色 */
+  --wood: #c99a63; /* 辅助木色 */
+  --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong",
+    "SimSun", Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+    system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--warm-1);
+  color: var(--ink-warm);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+
+.stage {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ---------- 背景 ---------- */
+.bg {
+  position: absolute;
+  inset: 0;
+  /* ★改这里：换背景大图。把新图放进 assets/img/，然后把路径改过来
+     不想让它缓慢推镜：把下面 animation 那行删掉
+     想更亮 / 更淡：调 filter 里的 brightness(1.06) 数值 */
+  background: url("../img/loading.jpg") center / cover no-repeat;
+  transform: scale(1.06);
+  animation: kenburns 26s ease-in-out infinite alternate;
+  filter: saturate(1.06) brightness(1.06) contrast(1.01);
+}
+@keyframes kenburns {
+  0% {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.13) translate3d(-1.6%, -1.2%, 0);
+  }
+}
+/* 遮罩：整体提亮，只在文字区铺一层暖白柔光
+   ★左边太暗/想更通透：把下面 linear-gradient 第一个 0.66 调小（如 0.5）
+     左边太亮/文字看不清：把它调大（如 0.75） */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      120% 90% at 80% 38%,
+      rgba(255, 240, 210, 0.34) 0%,
+      transparent 54%
+    ),
+    linear-gradient(
+      100deg,
+      rgba(255, 251, 242, 0.66) 0%,
+      rgba(255, 250, 240, 0.44) 32%,
+      rgba(255, 249, 236, 0.14) 62%,
+      rgba(255, 243, 224, 0.26) 100%
+    ),
+    linear-gradient(to top, rgba(70, 48, 28, 0.3), transparent 42%);
+}
+/* 斜射光带（明亮柔和） */
+.veil::after {
+  content: "";
+  position: absolute;
+  inset: -20% -10%;
+  background: linear-gradient(
+    108deg,
+    transparent 34%,
+    rgba(255, 250, 232, 0.4) 44%,
+    rgba(255, 253, 246, 0.58) 50%,
+    rgba(255, 250, 232, 0.4) 56%,
+    transparent 66%
+  );
+  filter: blur(22px);
+  animation: sway 16s ease-in-out infinite alternate;
+}
+@keyframes sway {
+  0% {
+    transform: translateX(-4%) rotate(-1deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(4%) rotate(1.5deg);
+    opacity: 1;
+  }
+}
+
+/* ---------- 浮尘 ---------- */
+.dust {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.dust i {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 250, 0.95);
+  box-shadow: 0 0 8px rgba(255, 244, 224, 0.9);
+  animation: float linear infinite;
+}
+@keyframes float {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(var(--dx), -70vh, 0);
+    opacity: 0;
+  }
+}
+
+/* ---------- 顶部 ---------- */
+.top {
+  position: absolute;
+  top: clamp(20px, 4vh, 40px);
+  left: clamp(22px, 5vw, 62px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 5;
+  animation: fadeDown 1s 0.2s both;
+}
+.mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: 20px;
+  color: #fff8ec;
+  background: linear-gradient(140deg, var(--wood), var(--warm-2));
+  box-shadow: 0 8px 20px -8px rgba(90, 62, 38, 0.5);
+}
+.top .t1 {
+  font-family: var(--serif);
+  font-size: 20px;
+  letter-spacing: 0.24em;
+  color: var(--ink-warm);
+  text-shadow: 0 1px 12px rgba(255, 252, 244, 0.9);
+}
+.top .t2 {
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  color: rgba(70, 49, 31, 0.6);
+  margin-top: 2px;
+}
+
+/* ---------- 中央 ---------- */
+.center {
+  position: absolute;
+  left: clamp(22px, 6vw, 92px);
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: min(640px, 82vw);
+  z-index: 6;
+}
+
+/* 美句 */
+.quote {
+  min-height: 168px;
+}
+.q-text {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3.4vw, 38px);
+  line-height: 1.62;
+  margin: 0 0 16px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink-warm);
+  text-shadow: 0 2px 20px rgba(255, 252, 244, 0.95),
+    0 1px 4px rgba(255, 252, 244, 0.95);
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+.q-by {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: rgba(70, 49, 31, 0.68);
+  margin: 0;
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+.quote.out .q-text,
+.quote.out .q-by {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.quote.in .q-text,
+.quote.in .q-by {
+  animation: quoteIn 1s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes quoteIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.q-mark {
+  font-family: var(--serif);
+  font-size: 54px;
+  line-height: 1;
+  color: var(--wood);
+  opacity: 0.55;
+  display: block;
+  margin-bottom: -6px;
+}
+
+/* 进度 */
+.loader {
+  width: min(420px, 76vw);
+  margin: 8px 0 26px;
+  animation: fadeUp 1s 0.5s both;
+}
+.bar {
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(70, 49, 31, 0.16);
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--wood), var(--honeysolid));
+  box-shadow: 0 0 12px rgba(232, 180, 95, 0.75);
+  transition: width 0.35s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.status {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: rgba(70, 49, 31, 0.66);
+  margin-top: 10px;
+}
+
+/* 门 */
+.door {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 34px;
+  border-radius: 999px;
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  color: #4a3018;
+  background: linear-gradient(140deg, #fbe6c2, var(--honeysolid));
+  box-shadow: 0 14px 32px -14px rgba(180, 128, 60, 0.85),
+    0 2px 0 rgba(255, 255, 255, 0.5) inset;
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition: 0.5s cubic-bezier(0.2, 0.8, 0.3, 1);
+  overflow: hidden;
+  animation: fadeUp 0.9s 0.7s both;
+}
+.door.ready {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.door::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.8) 50%,
+    transparent 66%
+  );
+  transform: translateX(-130%);
+}
+.door.ready:hover::after {
+  transform: translateX(130%);
+  transition: 0.85s;
+}
+.door.ready:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 42px -14px rgba(180, 128, 60, 0.95);
+}
+.door .arrow {
+  font-style: normal;
+  transition: transform 0.3s;
+}
+.door.ready:hover .arrow {
+  transform: translateX(5px);
+}
+.door:disabled {
+  filter: grayscale(0.35) brightness(0.94);
+}
+/* 待机光环 */
+.door.ready::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 154, 99, 0.6);
+  animation: halo 2.6s ease-out infinite;
+}
+@keyframes halo {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(1.16);
+    opacity: 0;
+  }
+}
+.hint {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: rgba(70, 49, 31, 0.55);
+  margin-top: 16px;
+  animation: fadeUp 1s 0.9s both;
+  transition: 0.4s;
+}
+
+/* ---------- 底部 ---------- */
+.bot {
+  position: absolute;
+  left: clamp(22px, 5vw, 62px);
+  right: clamp(22px, 5vw, 62px);
+  bottom: clamp(18px, 3.4vh, 34px);
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 250, 240, 0.72);
+  text-shadow: 0 1px 10px rgba(60, 40, 22, 0.55);
+  z-index: 5;
+  animation: fadeUp 1s 1.1s both;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ---------- 出场转场 ---------- */
+.wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--wx, 50%) var(--wy, 50%),
+    #fffaf0 0%,
+    #ffeed2 34%,
+    #f9dfb4 60%,
+    rgba(249, 223, 180, 0) 72%
+  );
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.9s ease;
+}
+.wipe.go {
+  opacity: 1;
+  transform: scale(3.4);
+}
+.stage.leave {
+  animation: leave 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes leave {
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+    filter: brightness(1.35) blur(6px);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .quote {
+    min-height: 190px;
+  }
+  .q-text {
+    font-size: 21px;
+  }
+  .door {
+    padding: 13px 26px;
+    letter-spacing: 0.14em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg,
+  .veil::after,
+  .dust {
+    animation: none;
+  }
+}

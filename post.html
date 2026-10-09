@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>文章 · 语林集</title>
+    <meta name="description" content="语林集的一篇文章。" />
+    <meta name="theme-color" content="#f7f1e6" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c99a63'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23fff8ec' font-family='serif'%3E语%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+  <body>
+    <div id="nav"></div>
+
+    <!-- ============================================================
+         「文章详情」页（post.html）
+         ★ 这个页面几乎不用动：所有文章的正文都从网址里的 id 去 data.js 取，
+           例如 post.html?id=afternoon-light 就显示那篇文章。
+         👉 写文章、改文章：assets/js/data.js 第 3 段 POSTS
+         👉 开评论区：data.js 第 1 段 SITE.giscus
+         ============================================================ -->
+    <main>
+      <article id="article">
+        <header class="article-head narrow">
+          <div class="article-meta" id="topMeta"></div><!-- ← 日期 / 标签，自动生成 -->
+          <h1 id="title">正在摊开纸张…</h1><!-- ★改这里：标题在读不到文章时显示的占位字（一般不用动） -->
+          <div class="article-meta" id="subMeta"></div><!-- ← 字数 / 阅读时长 / 复制链接 -->
+        </header>
+
+        <div class="narrow"><div class="article-cover" id="cover"></div></div><!-- ← 封面图，来自该篇文章的 cover 字段 -->
+
+        <div class="wrap">
+          <div class="post-layout">
+            <div class="prose" id="content"></div><!-- ← 正文用 Markdown 渲染出来的地方 -->
+            <aside class="toc" id="toc"></aside><!-- ← 右侧目录，自动抓取正文里的 ## 和 ### 标题 -->
+          </div>
+
+          <div id="tags" style="margin-top: 34px"></div><!-- ← 文章末尾的标签 -->
+          <div class="post-nav" id="postNav"></div><!-- ← 上一篇 / 下一篇，自动算 -->
+
+          <section id="related" style="margin-top: 48px"></section><!-- ← 相关文章（按共同标签推荐） -->
+          <div class="giscus-wrap" id="giscus"></div><!-- ← 评论区，在 data.js 的 SITE.giscus 里开启 -->
+        </div>
+      </article>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/markdown.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/pages/post.js"></script>
+  </body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>语林集 · 午后斜阳里的一间小馆</title><!-- ★改这里：浏览器标签标题 -->
+    <meta name="description" content="大大大椰子的个人小站：写字、拍照、慢慢生活。" /><!-- ★改这里：网站介绍 -->
+    <meta name="theme-color" content="#f7f1e6" /><!-- 手机地址栏颜色，一般不用动 -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c99a63'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23fff8ec' font-family='serif'%3E语%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+  <!-- ============================================================
+       首页
+       这个页面里，带 id 的空容器（#heroLede / #profile / #nowGrid / #postGrid /
+       #homeMasonry / #homeLinks）都不是在本文件里写的 —— 它们由 data.js 的数据自动填。
+       👉 要改那些内容，去 assets/js/data.js，本文件基本不用动。
+
+       本文件里真正能直接改的文字只有下面标了 ★改这里 的几处。
+       导航和页脚也不在这里，在 assets/js/app.js 的 mountNav / mountFooter。
+       ============================================================ -->
+  <body>
+    <div id="nav"></div><!-- 导航栏由 app.js 自动生成，不用改这里 -->
+
+    <main>
+      <!-- Hero：首屏大标题区 -->
+      <section class="hero">
+        <div class="wrap">
+          <div class="hero-grid">
+            <div>
+              <span class="hero-tag"><i></i>午后三点 · 正在营业</span><!-- ★改这里：标题上方那枚小标签 -->
+              <h1>把日子摊开在<em>木桌上</em>，<br />让阳光替我读一遍。</h1><!-- ★改这里：首页主标题（<em> 里的字是琥珀色，<br /> 是换行） -->
+              <p class="hero-lede" id="heroLede"></p><!-- 内容来自 data.js 的 SITE.bio 第一段 -->
+              <div class="hero-actions">
+                <a class="btn" href="./blog.html">读最新的一篇</a><!-- ★改这里：第一个按钮文字 -->
+                <a class="btn ghost" href="./gallery.html">看看照片</a><!-- ★改这里：第二个按钮文字 -->
+              </div>
+              <div class="hero-clock" id="heroClock"></div><!-- 日期与统计，自动生成 -->
+            </div>
+            <div class="hero-frame">
+              <img src="./assets/img/hero.jpg" alt="午后阳光斜照的木桌一角" id="heroImg" /><!-- ★改这里：换首屏大图（把新图放进 assets/img/ 再改这里的路径） -->
+              <div class="hero-frame-cap">
+                西窗 · 15:20<!-- ★改这里：大图右下角的小字，比如拍摄地点和时间 -->
+                <small>A ROOM WITH AFTERNOON</small><!-- ★改这里：下面那行英文小字 -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 个人介绍：内容来自 data.js 的 SITE.bio / SITE.chips / SITE.socials -->
+      <section id="about">
+        <div class="wrap">
+          <div class="divider-leaf">关 于 主 人</div><!-- ★改这里：栏目标题（字之间加空格更好看） -->
+          <div class="card profile reveal" id="profile"></div>
+        </div>
+      </section>
+
+      <!-- 此刻：内容来自 data.js 的 NOW -->
+      <section>
+        <div class="wrap">
+          <div class="divider-leaf">此 刻</div><!-- ★改这里：栏目标题 -->
+          <div class="now-grid" id="nowGrid"></div>
+        </div>
+      </section>
+
+      <!-- 文章：自动取最新的几篇（置顶优先），来自 data.js 的 POSTS -->
+      <section>
+        <div class="wrap">
+          <div class="divider-leaf">写 的 字</div><!-- ★改这里：栏目标题 -->
+          <div class="sec-head">
+            <div>
+              <h2 class="sec-title">最近的文章</h2><!-- ★改这里：小标题 -->
+            </div>
+            <a class="more-link" href="./blog.html">全部文章 →</a><!-- ★改这里：右上角链接文字 -->
+          </div>
+          <div class="post-grid" id="postGrid"></div>
+        </div>
+      </section>
+
+      <!-- 图片：内容来自 data.js 的 GALLERY -->
+      <section>
+        <div class="wrap">
+          <div class="divider-leaf">拍 的 光</div><!-- ★改这里：栏目标题 -->
+          <div class="sec-head">
+            <div>
+              <h2 class="sec-title">图片墙</h2><!-- ★改这里：小标题 -->
+            </div>
+            <a class="more-link" href="./gallery.html">进入相册 →</a><!-- ★改这里：右上角链接文字 -->
+          </div>
+          <div class="masonry" id="homeMasonry"></div>
+        </div>
+      </section>
+
+      <!-- 友链：内容来自 data.js 的 LINKS（首页只显示前 4 个） -->
+      <section>
+        <div class="wrap">
+          <div class="divider-leaf">隔 壁 邻 居</div><!-- ★改这里：栏目标题 -->
+          <div class="sec-head">
+            <div>
+              <h2 class="sec-title">友情链接</h2><!-- ★改这里：小标题 -->
+            </div>
+            <a class="more-link" href="./links.html">全部友链 →</a><!-- ★改这里：右上角链接文字 -->
+          </div>
+          <div class="link-grid" id="homeLinks"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="footer"></div><!-- 页脚由 app.js 自动生成，不用改这里 -->
+
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/markdown.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/pages/home.js"></script>
+  </body>
+</html>
