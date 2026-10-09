@@ -68,5 +68,55 @@
 
     <script src="./assets/js/data.js"></script>
     <script src="./assets/js/loading.js"></script>
+
+    <!-- ============================================================
+         ★ 保险丝（建议保留）
+         作用：万一 data.js 里手滑漏了个逗号或引号，整个脚本会崩，
+               加载页就会一直卡在 0%，把人挡在门外干瞪眼。
+               这段脚本独立于上面两个文件单独运行，即使它们报错也会执行：
+               · 发现 data.js 没读进来 → 立刻弹提示，告诉你去查哪里
+               · 超过 5 秒还是 0%   → 自动放行进首页，不至于卡死
+         网站一切正常时，它什么都不做，不会打扰你。
+         ============================================================ -->
+    <script>
+      (function () {
+        var jumped = false;
+        function tip(msg) {
+          if (document.getElementById("yljSafeTip")) return;
+          var b = document.createElement("div");
+          b.id = "yljSafeTip";
+          b.style.cssText =
+            "position:fixed;z-index:99;left:50%;top:16px;transform:translateX(-50%);" +
+            "max-width:min(92vw,520px);padding:12px 18px;border-radius:12px;" +
+            "background:#fff4ee;border:1px solid #e2a58c;color:#6f3320;" +
+            "font:13px/1.75 -apple-system,'PingFang SC','Microsoft YaHei',sans-serif;text-align:center";
+          b.innerHTML = msg;
+          document.body.appendChild(b);
+        }
+        function go() {
+          if (jumped) return;
+          jumped = true;
+          location.href = "./home.html";
+        }
+        // ① data.js 或 loading.js 崩了 —— 800ms 就能判断出来
+        setTimeout(function () {
+          if (typeof SITE === "undefined" || typeof QUOTES === "undefined") {
+            tip(
+              "像是 <b>assets/js/data.js</b> 里有语法错误（多半是漏了逗号或引号），<br>" +
+                "请打开它检查一下最后改动的那几行。<br>3 秒后先放你进首页。"
+            );
+            setTimeout(go, 3000);
+          }
+        }, 800);
+        // ② 文件没毛病，但进度迟迟不动（比如某个图片地址卡住）
+        setTimeout(function () {
+          var el = document.getElementById("pct");
+          if (el && el.textContent.replace("%", "").trim() === "0") {
+            tip("加载似乎卡住了，先带你进首页看看。");
+            setTimeout(go, 1500);
+          }
+        }, 5000);
+      })();
+    </script>
   </body>
 </html>
