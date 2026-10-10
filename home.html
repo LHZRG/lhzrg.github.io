@@ -15,7 +15,7 @@
   <!-- ============================================================
        首页
        这个页面里，带 id 的空容器（#heroLede / #profile / #nowGrid / #postGrid /
-       #homeMasonry / #homeLinks）都不是在本文件里写的 —— 它们由 data.js 的数据自动填。
+       #homeMasonry / #homeTools / #homeLinks）都不是在本文件里写的 —— 它们由 data.js 的数据自动填。
        👉 要改那些内容，去 assets/js/data.js，本文件基本不用动。
 
        本文件里真正能直接改的文字只有下面标了 ★改这里 的几处。
@@ -91,6 +91,20 @@
             <a class="more-link" href="./gallery.html">进入相册 →</a><!-- ★改这里：右上角链接文字 -->
           </div>
           <div class="masonry" id="homeMasonry"></div>
+        </div>
+      </section>
+
+      <!-- 实用工具：三个工具的入口，内容来自 data.js 第 10 段 TOOLS（显示几个 → HOME_LAYOUT.tools） -->
+      <section>
+        <div class="wrap">
+          <div class="divider-leaf">实 用 工 具</div><!-- ★改这里：栏目标题 -->
+          <div class="sec-head">
+            <div>
+              <h2 class="sec-title">随手的小工具</h2><!-- ★改这里：小标题 -->
+            </div>
+            <a class="more-link" href="./tools.html">全部工具 →</a><!-- ★改这里：右上角链接文字 -->
+          </div>
+          <div class="tool-grid" id="homeTools"></div>
         </div>
       </section>
 

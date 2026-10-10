@@ -17,7 +17,8 @@ const DATA = (() => {
     );
     // 用 new Function 包一层，比 eval + 替换 const 更稳（也不会误伤文件内容）
     const D = new Function(
-      src + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT});"
+      src +
+        "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT,TOOLS,TOOLS_CONFIG,FOOD_AREAS,FOOD_SPOTS});"
     )();
     const tags = new Set();
     D.POSTS.forEach((p) => (p.tags || []).forEach((t) => tags.add(t)));
@@ -41,6 +42,12 @@ const DATA = (() => {
       homeGallery: cnt("gallery", D.GALLERY.length),
       homeLinks: cnt("links", D.LINKS.length),
       homeNow: cnt("now", D.NOW.length),
+      homeTools: cnt("tools", (D.TOOLS || []).length),
+      tools: (D.TOOLS || []).length,
+      areas: (D.FOOD_AREAS || []).length,
+      spots: (D.FOOD_SPOTS || []).length,
+      /* 实用工具的参数（骰子最多几颗、动画多长），测试按它来等动画 */
+      cfg: D.TOOLS_CONFIG || { diceMax: 10, coinMax: 10, rollMs: 900, flipMs: 1100, foodDrawMs: 700 },
       /* 首页图片墙末尾那张「光影待续」占位卡，只在照片全部显示完时才出现 */
       galleryPlaceholder: Number(L.gallery) > 0 && Number(L.gallery) < D.GALLERY.length ? 0 : 1,
     };
@@ -56,7 +63,7 @@ console.log(
 );
 console.log(
   "首页显示：" + DATA.homePosts + " 篇文章 / " + DATA.homeGallery + " 张照片 / " +
-    DATA.homeLinks + " 个友链 / " + DATA.homeNow + " 项此刻\n"
+    DATA.homeLinks + " 个友链 / " + DATA.homeNow + " 项此刻 / " + DATA.homeTools + " 个工具\n"
 );
 
 const BASE = process.env.BASE || "http://127.0.0.1:8123";
@@ -71,11 +78,13 @@ const PAGES = [
   ["home.html", (d) => [
     ["搜索面板", d.querySelector("#searchPanel") !== null, true],
     ["回到顶部", d.querySelector("#toTop") !== null, true],
-    ["导航链接", d.querySelectorAll("#nav .nav-links a").length, 5],
+    ["导航链接", d.querySelectorAll("#nav .nav-links a").length, 6],
     ["精选文章卡", d.querySelectorAll("#postGrid .post-card").length, DATA.homePosts],
     ["首页图片墙", d.querySelectorAll("#homeMasonry .shot").length, DATA.homeGallery + DATA.galleryPlaceholder],
     ["个人介绍", d.querySelector("#profile").textContent.trim().length > 50, true],
     ["此刻卡片", d.querySelectorAll("#nowGrid .now-card").length, DATA.homeNow],
+    ["首页工具入口", d.querySelectorAll("#homeTools .tool-entry").length, DATA.homeTools],
+    ["工具入口有链接", /tools\.html#/.test(d.querySelector("#homeTools .tool-entry").getAttribute("href") || ""), true],
     ["首页友链", d.querySelectorAll("#homeLinks .link-card").length, DATA.homeLinks],
   ], async (d, w) => {
     /* 首页的友链卡片也应该弹出同一个详情窗格 */
@@ -111,6 +120,51 @@ const PAGES = [
     ["相册张数", d.querySelectorAll("#galleryGrid .shot").length, DATA.gallery + 1],
     ["计数文案", d.querySelector("#shotNum").textContent, String(DATA.gallery)],
   ]],
+  ["tools.html", (d) => [
+    ["工具面板", d.querySelectorAll(".tool-panel").length, DATA.tools],
+    ["骰子数量按钮", d.querySelectorAll("#dicePick .num-pick").length, DATA.cfg.diceMax],
+    ["硬币数量按钮", d.querySelectorAll("#coinPick .num-pick").length, DATA.cfg.coinMax],
+    ["地区选项", d.querySelectorAll("#foodArea .seg-btn").length, DATA.areas],
+    ["范围选项", d.querySelectorAll("#foodZone .seg-btn").length > 0, true],
+    ["范围提示", d.querySelector("#foodCount").textContent.trim().length > 0, true],
+  ], async (d, w) => {
+    const out = [];
+    const click = (el) => el.dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+    const cfg = DATA.cfg;
+
+    /* ① 骰子：选 3 颗扔一把 */
+    click(d.querySelectorAll("#dicePick .num-pick")[2]);
+    click(d.querySelector("#diceRoll"));
+    await sleep(cfg.rollMs + 3 * 70 + 300);
+    out.push(["骰子落下 3 颗", d.querySelectorAll("#diceTray .die").length, 3]);
+    out.push(["骰面已定点数", d.querySelectorAll("#diceTray .die-face i.on").length > 0, true]);
+    out.push(["输出了总和", /总和/.test(d.querySelector("#diceResult").textContent), true]);
+
+    /* ② 硬币：选 4 枚扔一把 */
+    click(d.querySelectorAll("#coinPick .num-pick")[3]);
+    click(d.querySelector("#coinRoll"));
+    await sleep(cfg.flipMs + 4 * 90 + 4 * 60 + 500);
+    out.push(["硬币落下 4 枚", d.querySelectorAll("#coinTray .coin").length, 4]);
+    out.push(["两面图案已画上", d.querySelectorAll("#coinTray .coin-art").length, 4]);
+    out.push(["输出了正反面", /正面/.test(d.querySelector("#coinResult").textContent), true]);
+
+    /* ③ 今天吃什么：抽一张，翻照片，再换一家 */
+    click(d.querySelector("#foodDraw"));
+    await sleep(cfg.foodDrawMs + 300);
+    out.push(["抽出餐厅卡", d.querySelector(".food-card") !== null, true]);
+    out.push(["有店名", d.querySelector(".food-card .food-title h3").textContent.trim().length > 0, true]);
+    out.push(["照片可翻页", d.querySelectorAll(".food-card .shot-track img").length, 2]);
+    out.push(["有存图按钮", d.querySelector("#foodShot") !== null, true]);
+    const track = d.querySelector("#shotTrack");
+    click(d.querySelector("#shotNext"));
+    await sleep(100);
+    out.push(["翻到第二张", /-100%/.test(track.style.transform), true]);
+    out.push(["张数提示更新", d.querySelector("#shotCount").textContent.trim(), "2 / 2"]);
+    click(d.querySelector("#foodAgain"));
+    await sleep(cfg.foodDrawMs + 300);
+    out.push(["换一家仍抽到卡", d.querySelector(".food-card") !== null, true]);
+    return out;
+  }],
   ["links.html", (d) => [
     ["友链卡片", d.querySelectorAll("#linkGrid .link-card").length, DATA.links],
     ["卡片都带下标", d.querySelectorAll("#linkGrid .link-card[data-i]").length, DATA.links],
@@ -125,7 +179,12 @@ const PAGES = [
     card.dispatchEvent(new w.MouseEvent("click", { bubbles: true, cancelable: true }));
     await sleep(120);
     out.push(["点卡片后弹窗打开", modal.classList.contains("open"), true]);
-    out.push(["背景锁定滚动", d.body.style.overflow, "hidden"]);
+    /* 锁是加在 <html> 上的（锁 body 会和 body 上的 overflow-x:clip 打架） */
+    out.push([
+      "背景锁定滚动",
+      d.documentElement.style.overflow || d.body.style.overflow,
+      "hidden",
+    ]);
     out.push(["站名已填入", d.querySelector("#lmName").textContent.trim().length > 0, true]);
     out.push(["快照区有图或占位", d.querySelector("#lmShot").children.length > 0, true]);
     out.push(["评价已渲染", d.querySelectorAll("#lmReview p").length > 0, true]);

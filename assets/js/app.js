@@ -38,7 +38,14 @@ const App = (() => {
     return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
   }
 
-  const wordsOf = (p) => Markdown.plain(p.body || "").replace(/\s/g, "").length;
+  /* 字数算一遍就记住：首页和文章列表页每张卡片都要算，
+     不缓存的话同一篇文章的正文会被反复解析成纯文本 */
+  const _wordCache = new Map();
+  const wordsOf = (p) => {
+    const k = p.id || p.title;
+    if (!_wordCache.has(k)) _wordCache.set(k, Markdown.plain(p.body || "").replace(/\s/g, "").length);
+    return _wordCache.get(k);
+  };
   const readTime = (p) => Math.max(1, Math.round(wordsOf(p) / 350));
   const byId = (id) => POSTS.find((p) => p.id === id);
   const postUrl = (id) => `./post.html?id=${encodeURIComponent(id)}`;
@@ -48,6 +55,30 @@ const App = (() => {
     POSTS.forEach((p) => (p.tags || []).forEach((t) => m.set(t, (m.get(t) || 0) + 1)));
     return [...m.entries()].sort((a, b) => b[1] - a[1]);
   };
+
+  /* ---------- 弹层锁滚动 ----------
+     搜索面板 / 灯箱 / 友链弹窗打开时，别让背后的页面跟着滚。
+     ⚠ 锁在 <html>（documentElement）上，不要锁 body：
+       body 上还有 overflow-x:clip 在管横向溢出，两个会互相干扰，
+       在某些浏览器上锁不住。
+     用计数器是因为可能同时开好几个（比如灯箱里再开搜索），
+     关掉其中一个不能把别的锁一起解了。
+     另外补上滚动条的宽度，免得锁的一瞬间页面横向跳一下。 */
+  let _lockCount = 0;
+  function lockScroll(on) {
+    const root = document.documentElement;
+    if (on) {
+      if (_lockCount++ > 0) return;
+      const gap = window.innerWidth - root.clientWidth;
+      if (gap > 0) document.body.style.paddingRight = gap + "px";
+      root.style.overflow = "hidden";
+    } else {
+      if (_lockCount === 0) return;
+      if (--_lockCount > 0) return;
+      root.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+  }
 
   /* ---------- 环境光影 ---------- */
   function mountAmbient() {
@@ -88,11 +119,20 @@ const App = (() => {
       ["home.html", "首页"],
       ["blog.html", "文章"],
       ["gallery.html", "图片"],
+      ["tools.html", "工具"], // ← 实用工具（骰子 / 硬币 / 今天吃什么）
       ["links.html", "友链"],
       ["about.html", "关于"],
     ];
     const el = $("#nav");
     if (!el) return;
+    /* ⚠ 这个 .nav 类是直接加在页面里那个 <div id="nav"> 上的，不要再往里套一层 div。
+       原因：position:sticky 只能在「父容器」的范围内粘住。
+       如果套一层 <div class="nav">，它的父容器 #nav 只有 66px 高，
+       滚过 66px 导航就跟着页面一起飞走了，根本吸不住。
+       挂在 #nav 上，父容器是 body（有整页那么高），吸顶才正常。
+       同时它还提供了 --z-nav 层级，让手机端展开的菜单压住正文 —— 少了它，
+       菜单就会被下面的正文盖住，手机上点不到「文章 / 图片」。 */
+    el.classList.add("nav");
     el.innerHTML = `
       <div class="nav-inner">
         <a class="brand" href="./home.html" aria-label="${esc(SITE.name)}">
@@ -109,15 +149,42 @@ const App = (() => {
         <div class="nav-tools">
           <button class="icon-btn" id="searchBtn" title="搜索文章 (Ctrl+K)" aria-label="搜索">${ICON.search}</button>
           <button class="icon-btn" id="themeBtn" title="切换日光 / 灯下" aria-label="切换主题"></button>
-          <button class="icon-btn burger" id="burger" aria-label="菜单">${ICON.menu}</button>
+          <button class="icon-btn burger" id="burger" aria-label="菜单" aria-controls="navLinks" aria-expanded="false">${ICON.menu}</button>
         </div>
       </div>`;
 
     const links = $("#navLinks");
-    $("#burger").addEventListener("click", () => links.classList.toggle("open"));
-    links.addEventListener("click", (e) => {
-      if (e.target.tagName === "A") links.classList.remove("open");
+    const burger = $("#burger");
+
+    /* 手机端菜单的开关。
+       关掉的四种方式：再点一次汉堡、点菜单里的某一项、点菜单外面、按 ESC。
+       另外窗口拉宽到电脑尺寸时自动收起，免得残留一个悬浮的菜单。 */
+    const setMenu = (open) => {
+      links.classList.toggle("open", open);
+      burger.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+    burger.addEventListener("click", (e) => {
+      e.stopPropagation(); // 别让下面「点外面就收起」的监听立刻把它关掉
+      setMenu(!links.classList.contains("open"));
     });
+    links.addEventListener("click", (e) => {
+      if (e.target.tagName === "A") setMenu(false);
+    });
+    document.addEventListener("click", (e) => {
+      if (!links.classList.contains("open")) return;
+      if (links.contains(e.target) || burger.contains(e.target)) return;
+      setMenu(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && links.classList.contains("open")) {
+        setMenu(false);
+        burger.focus();
+      }
+    });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 860 && links.classList.contains("open")) setMenu(false);
+    });
+
     $("#searchBtn").addEventListener("click", openSearch);
     $("#themeBtn").addEventListener("click", toggleTheme);
     syncThemeIcon();
@@ -167,6 +234,7 @@ const App = (() => {
               <li><a href="./home.html">回到首页</a></li>
               <li><a href="./blog.html">全部文章</a></li>
               <li><a href="./gallery.html">图片墙</a></li>
+              <li><a href="./tools.html">实用工具</a></li>
               <li><a href="./links.html">友情链接</a></li>
               <li><a href="./about.html">关于我</a></li>
             </ul>
@@ -213,6 +281,22 @@ const App = (() => {
     panel.addEventListener("click", (e) => {
       if (e.target === panel) closeSearch();
     });
+    /* 搜索索引只建一次。
+       以前是每敲一个字就把所有文章的正文重新解析一遍纯文本，
+       文章一多输入就卡；现在开面板时建好，之后只做字符串匹配。
+       （文章是在 data.js 里写死的，页面不刷新就不会变，缓存是安全的） */
+    let index = null;
+    const buildIndex = () =>
+      index ||
+      (index = POSTS.map((p) => {
+        const plain = Markdown.plain(p.body || "");
+        return {
+          p,
+          plain,
+          hay: (p.title + " " + p.excerpt + " " + (p.tags || []).join(" ") + " " + plain).toLowerCase(),
+        };
+      }));
+
     input.addEventListener("input", () => {
       const q = input.value.trim().toLowerCase();
       const res = $("#searchResults");
@@ -220,13 +304,12 @@ const App = (() => {
       res.innerHTML = `<div class="search-empty">输入点什么吧，比如「光」「咖啡」「博客」</div>`; // ★改这里：刚打开搜索面板时的提示语
       return;
       }
-      const hits = POSTS.map((p) => {
-        const hay = (p.title + " " + p.excerpt + " " + (p.tags || []).join(" ") + " " + Markdown.plain(p.body)).toLowerCase();
+      const hits = buildIndex().map(({ p, hay, plain }) => {
         if (!hay.includes(q)) return null;
         // 命中片段
-        const pl = Markdown.plain(p.body).toLowerCase();
+        const pl = plain.toLowerCase();
         const at = pl.indexOf(q);
-        const snip = at < 0 ? p.excerpt : (at > 24 ? "…" : "") + Markdown.plain(p.body).slice(at - 12, at + 60) + "…";
+        const snip = at < 0 ? p.excerpt : (at > 24 ? "…" : "") + plain.slice(at - 12, at + 60) + "…";
         const titleScore = p.title.toLowerCase().includes(q) ? 100 : 0;
         return { p, snip, score: titleScore + (p.tags || []).filter((t) => t.toLowerCase().includes(q)).length * 10 };
       })
@@ -255,17 +338,25 @@ const App = (() => {
   const hi = (s, q) =>
     esc(s).replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"), "<mark>$1</mark>");
 
+  let _searchFrom = null;
   function openSearch() {
     const p = $("#searchPanel");
     if (!p) return;
+    _searchFrom = document.activeElement; // 关掉之后把焦点还回去
     p.classList.add("open");
+    lockScroll(true);
     const inp = $("#searchInput");
     inp.value = "";
     $("#searchResults").innerHTML = `<div class="search-empty">输入点什么吧，比如「光」「咖啡」「博客」</div>`;
     setTimeout(() => inp.focus(), 60);
   }
   function closeSearch() {
-    $("#searchPanel")?.classList.remove("open");
+    const p = $("#searchPanel");
+    if (!p || !p.classList.contains("open")) return;
+    p.classList.remove("open");
+    lockScroll(false);
+    if (_searchFrom && _searchFrom.focus) _searchFrom.focus();
+    _searchFrom = null;
   }
 
   /* ---------- ⑥ 看大图的灯箱（图片页 / 首页点照片时用） ---------- */
@@ -294,7 +385,13 @@ const App = (() => {
       )}</small>`;
     };
 
-    $(".lb-close", lb).onclick = () => lb.classList.remove("open");
+    const closeLb = () => {
+      if (!lb.classList.contains("open")) return;
+      lb.classList.remove("open");
+      lockScroll(false);
+    };
+
+    $(".lb-close", lb).onclick = closeLb;
     $(".lb-prev", lb).onclick = (e) => {
       e.stopPropagation();
       show(idx - 1);
@@ -304,13 +401,13 @@ const App = (() => {
       show(idx + 1);
     };
     lb.onclick = (e) => {
-      if (e.target === lb) lb.classList.remove("open");
+      if (e.target === lb) closeLb();
     };
     document.addEventListener("keydown", (e) => {
       if (!lb.classList.contains("open")) return;
       if (e.key === "ArrowLeft") show(idx - 1);
       if (e.key === "ArrowRight") show(idx + 1);
-      if (e.key === "Escape") lb.classList.remove("open");
+      if (e.key === "Escape") closeLb();
     });
 
     return {
@@ -318,7 +415,9 @@ const App = (() => {
         list = items;
         show(start);
         lb.classList.add("open");
+        lockScroll(true);
       },
+      close: closeLb,
     };
   }
 
@@ -375,8 +474,9 @@ const App = (() => {
     let lastFocus = null;
 
     const close = () => {
+      if (!modal.classList.contains("open")) return;
       modal.classList.remove("open");
-      document.body.style.overflow = "";
+      lockScroll(false);
       if (lastFocus && lastFocus.focus) lastFocus.focus();
     };
 
@@ -438,7 +538,7 @@ const App = (() => {
         .map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`)
         .join("");
 
-      document.body.style.overflow = "hidden";
+      lockScroll(true);
       modal.classList.add("open");
       // 让动画从点击处稍微展开的感觉：把焦点交给关闭按钮，键盘用户也好操作
       $(".lm-x", modal).focus?.();
@@ -457,21 +557,33 @@ const App = (() => {
     );
     const b = $("#toTop");
     b.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
-    const onScroll = () => b.classList.toggle("show", window.scrollY > 420);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
 
     // 阅读进度条（文章页用）
     const bar = document.createElement("div");
     bar.className = "read-progress";
     bar.id = "readProgress";
     document.body.appendChild(bar);
-    const prog = () => {
+
+    /* 「回到顶部」和「阅读进度条」都要盯滚动。
+       合成一个监听 + requestAnimationFrame 节流：
+       一帧最多算一次，手机上快速滑动时不会掉帧。 */
+    let ticking = false;
+    const measure = () => {
+      b.classList.toggle("show", window.scrollY > 420);
       const h = document.documentElement.scrollHeight - window.innerHeight;
       bar.style.width = h > 0 ? Math.min(100, (window.scrollY / h) * 100) + "%" : "0";
     };
-    window.addEventListener("scroll", prog, { passive: true });
-    prog();
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        measure();
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    measure();
   }
 
   /* ---------- ⑧ 进场动画（滚动到某个区块时，它慢慢浮现出来） ---------- */

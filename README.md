@@ -20,6 +20,7 @@
 ├── blog.html               # 文章列表
 ├── post.html               # 文章详情
 ├── gallery.html            # 图片墙
+├── tools.html              # 实用工具（骰子 / 硬币 / 今天吃什么）
 ├── links.html              # 友链
 ├── about.html              # 关于
 ├── assets/
@@ -27,7 +28,7 @@
 │   │   ├── loading.css     # 加载页样式
 │   │   └── main.css        # 全站样式（配色变量在顶部 :root）
 │   ├── js/
-│   │   ├── data.js         # ★ 全站内容：文章、相册、友链、站名
+│   │   ├── data.js         # ★ 全站内容：文章、相册、友链、站名、工具与餐厅卡片
 │   │   ├── app.js          # 导航、页脚、搜索、灯箱、主题
 │   │   ├── loading.js      # 加载页交互
 │   │   └── markdown.js     # 极简 Markdown 渲染器
@@ -36,13 +37,13 @@
 │       ├── hero.jpg
 │       ├── loading.jpg
 │       ├── snap-placeholder.jpg   # 友链弹窗的快照占位图
-│       └── gallery-*.jpg
+│       ├── gallery-*.jpg
+│       └── food/           # ★「今天吃什么」的餐厅照片
 ├── tools/
 │   ├── compress_images.py  # 图片压缩脚本
 │   ├── check-data.js       # 数据体检：查漏逗号、坏路径、段落被合并
-│   └── smoke.js            # 全站冒烟测试：模拟打开 9 个页面
+│   └── smoke.js            # 全站冒烟测试：模拟打开 10 个页面
 ├── .nojekyll               # 告诉 GitHub Pages 不要用 Jekyll
 └── README.md
 
 慢慢写，别着急。光好的时候再更新。
-

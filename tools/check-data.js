@@ -8,14 +8,14 @@ const md = fs.readFileSync(path.join(root, "assets/js/markdown.js"), "utf8");
 
 let D;
 try {
-  D = new Function(src + "\n" + md + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT,Markdown});")();
+  D = new Function(src + "\n" + md + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT,TOOLS,TOOLS_CONFIG,FOOD_AREAS,FOOD_SPOTS,Markdown});")();
 } catch (e) {
   console.log("❌ data.js 执行报错：", e.message);
   process.exit(1);
 }
 
 const Markdown = D.Markdown;
-const { SITE, POSTS, QUOTES, GALLERY, LINKS, TIMELINE, NOW, SKILLS, HOME_LAYOUT } = D;
+const { SITE, POSTS, QUOTES, GALLERY, LINKS, TIMELINE, NOW, SKILLS, HOME_LAYOUT, TOOLS, TOOLS_CONFIG, FOOD_AREAS, FOOD_SPOTS } = D;
 
 const problems = [], warns = [];
 const P = (m) => problems.push(m);
@@ -149,6 +149,70 @@ SKILLS.forEach((s, i) => {
   if (!isStr(s.name)) P(`SKILLS 第 ${i + 1} 项缺 name`);
   if (typeof s.value !== "number" || s.value < 0 || s.value > 100)
     P(`SKILLS 第 ${i + 1} 项的 value 要填 0~100 的数字，现在是 ${s.value}`);
+});
+
+/* ---------- 第 10 段：实用工具（骰子 / 硬币 / 今天吃什么） ---------- */
+console.log("\n【实用工具】", (TOOLS || []).length, "个工具");
+(TOOLS || []).forEach((t, i) => {
+  if (!t || typeof t !== "object") { P(`TOOLS 第 ${i + 1} 项不是对象`); return; }
+  if (!isStr(t.id)) P(`TOOLS 第 ${i + 1} 个缺 id（要和 tools.html 里的工具对得上）`);
+  if (!isStr(t.name)) P(`TOOLS 第 ${i + 1} 个缺 name`);
+  if (!isStr(t.desc)) W(`TOOLS 第 ${i + 1} 个没写 desc（卡片上的一句话说明）`);
+  if (!isStr(t.icon)) W(`TOOLS 第 ${i + 1} 个没写 icon`);
+  console.log("   " + String(t.id).padEnd(8) + String(t.icon || "").padEnd(4) + String(t.name || ""));
+});
+if (!(TOOLS || []).length) W("TOOLS 是空的，首页和工具页都不会显示工具入口");
+
+const CFG = TOOLS_CONFIG || {};
+if (!TOOLS_CONFIG) W("没找到 TOOLS_CONFIG，工具会用默认值：骰子 10 颗 / 硬币 10 枚");
+["diceMax", "coinMax", "diceFaces"].forEach((k) => {
+  const v = CFG[k];
+  if (v !== undefined && (!Number.isInteger(v) || v < 1)) P(`TOOLS_CONFIG.${k} 要填大于 0 的整数，现在是 ${v}`);
+});
+["rollMs", "flipMs", "foodDrawMs"].forEach((k) => {
+  const v = CFG[k];
+  if (v !== undefined && (!Number.isInteger(v) || v < 100 || v > 6000))
+    W(`TOOLS_CONFIG.${k} 建议填 100~6000（毫秒），现在是 ${v}`);
+});
+
+console.log("【抽取范围】", (FOOD_AREAS || []).length, "个地区");
+const areaIds = [];
+(FOOD_AREAS || []).forEach((a, i) => {
+  if (!a || typeof a !== "object") { P(`FOOD_AREAS 第 ${i + 1} 项不是对象`); return; }
+  if (!isStr(a.id)) P(`FOOD_AREAS 第 ${i + 1} 个缺 id`);
+  else areaIds.push(a.id);
+  if (!isStr(a.name)) P(`FOOD_AREAS 第 ${i + 1} 个缺 name（地区名）`);
+  if (!Array.isArray(a.zones) || !a.zones.length)
+    P(`FOOD_AREAS 第 ${i + 1} 个的 zones 要是数组，比如 ["校内", "校外"]`);
+});
+
+console.log("【餐厅卡片】", (FOOD_SPOTS || []).length, "家");
+(FOOD_SPOTS || []).forEach((s, i) => {
+  const tag = `FOOD_SPOTS 第 ${i + 1} 家「${s && s.name ? s.name : "?"}」`;
+  if (!s || typeof s !== "object") { P(`FOOD_SPOTS 第 ${i + 1} 项不是对象`); return; }
+  if (!isStr(s.name)) P(`${tag} 缺 name（门面名称）`);
+  if (!isStr(s.area)) P(`${tag} 缺 area（属于哪个地区，要写 FOOD_AREAS 里的 id）`);
+  else if (areaIds.length && areaIds.indexOf(s.area) < 0)
+    P(`${tag} 的 area="${s.area}" 在 FOOD_AREAS 里找不到（可填的 id：${areaIds.join(" / ")}）`);
+  if (!isStr(s.zone)) P(`${tag} 缺 zone（"校内" 或 "校外"）`);
+  else {
+    const a = (FOOD_AREAS || []).find((x) => x.id === s.area);
+    if (a && Array.isArray(a.zones) && a.zones.indexOf(s.zone) < 0)
+      P(`${tag} 的 zone="${s.zone}" 不在「${a.name}」的范围里（它只有：${a.zones.join(" / ")}）`);
+  }
+  if (!isStr(s.address)) W(`${tag} 没写 address（门面地址）`);
+  if (!isStr(s.taste)) W(`${tag} 没写 taste（口味偏好）`);
+  if (!isStr(s.price)) W(`${tag} 没写 price（价格区间）`);
+  if (!s.review) W(`${tag} 还没写 review（我的评价）`);
+  else if (!Array.isArray(s.review) && typeof s.review !== "string")
+    P(`${tag} 的 review 只能是文字或文字数组`);
+  const photos = Array.isArray(s.photos) ? s.photos.filter(Boolean) : [];
+  if (!photos.length) W(`${tag} 还没放照片，抽到它时照片区会是空的`);
+  photos.forEach((p) => {
+    if (!/^https?:/.test(p) && !fileOK(p)) P(`${tag} 的照片不存在：${p}`);
+  });
+  if (s.tags && !Array.isArray(s.tags)) W(`${tag} 的 tags 不是 [ ] 数组`);
+  console.log("   " + String(s.name).padEnd(14) + String(s.area || "").padEnd(9) + String(s.zone || "").padEnd(6) + photos.length + " 张照片");
 });
 
 /* ---------- HOME_LAYOUT（首页每个栏目显示几条 + 排序方式） ---------- */

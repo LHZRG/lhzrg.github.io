@@ -17,6 +17,7 @@
      9. 文章卡片            首页和文章列表页的卡片
     10. 图片墙             瀑布流 + 点开看大图的灯箱
     11. 友链                友链卡片网格
+    11.5 实用工具            骰子 / 硬币 / 今天吃什么（骰子硬币用固定实物色）
     12. 时间轴              关于页那条竖线大事记
     13. 文章正文            .prose —— 标题、引用、代码块、表格
     14. 工具条              目录、代码块复制按钮等
@@ -80,6 +81,23 @@
   --sun-glow: rgba(255, 216, 154, 0.55);
   --sun-bright: rgba(255, 240, 210, 0.85);
 
+  /* ★改这里：层级表——谁盖在谁上面。
+     全站所有 z-index 都引用这几个变量，不要再写死数字，
+     否则又会出现「菜单被正文盖住」这种层级打架的问题。
+       背景光 0  →  噪点 1  →  正文 2
+       导航栏 60  →  回到顶部 70  →  阅读进度 80
+       入站暖光 130  →  搜索 190  →  灯箱 200  →  友链弹窗 220 */
+  --z-bg: 0;
+  --z-grain: 1;
+  --z-content: 2;
+  --z-nav: 60;
+  --z-totop: 70;
+  --z-progress: 80;
+  --z-burst: 130;
+  --z-search: 190;
+  --z-lightbox: 200;
+  --z-modal: 220;
+
   /* 字体：衬线用于标题，无衬线用于正文。想换字体在这两行开头加你想要的字体名 */
   --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong",
     "SimSun", Georgia, serif;
@@ -90,6 +108,11 @@
   --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
 
   --maxw: 1180px; /* ★改这里：内容区最大宽度（px）。想让页面更宽就加大 */
+
+  /* ★改这里：导航栏高度。改了它，下面这些会自动跟着变：
+       导航条本身的高度、手机菜单的最大高度、
+       滚动到锚点时给导航预留的空隙（不然标题会被导航压住） */
+  --nav-h: 66px;
 }
 
 /* ---------- 夜色：点右上角按钮切到「灯下」时的配色 ----------
@@ -125,6 +148,12 @@
 html {
   scroll-behavior: smooth;
 }
+/* 导航是吸顶的，直接跳到某个 id 时，那块内容会被导航压住一截。
+   这里统一给所有锚点目标留出导航的高度 + 一点呼吸。
+   （影响：文章页右侧目录跳转、页脚「交换友链」等 #xxx 链接） */
+[id] {
+  scroll-margin-top: calc(var(--nav-h) + 22px);
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -133,7 +162,13 @@ body {
   font-size: 16px;
   line-height: 1.8;
   -webkit-font-smoothing: antialiased;
+  /* 横向溢出兜底。
+     ⚠ 不要用 hidden 收尾：hidden 会把 body 变成滚动容器，
+       里面的 position:sticky（导航栏、文章页目录）就再也不吸顶了。
+       clip 只裁剪、不产生滚动容器，所以最后一行的 clip 必须保留；
+       上一行 hidden 是给不支持 clip 的老浏览器兜底的。 */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 img {
   max-width: 100%;
@@ -184,7 +219,7 @@ button {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: var(--z-bg);
   overflow: hidden;
 }
 /* 斜射光带 */
@@ -207,6 +242,8 @@ button {
   filter: blur(26px);
   opacity: 0.75;
   animation: sunbreathe 14s ease-in-out infinite alternate;
+  /* 性能：这层一直在动，单独提成合成层，避免每帧把整屏重画一遍 */
+  will-change: transform, opacity;
 }
 /* 地面柔光（无条纹） */
 .sunwash::after {
@@ -232,6 +269,23 @@ button {
 [data-theme="night"] .sunwash::after {
   opacity: 0.4;
 }
+/* 性能：手机 GPU 弱，模糊半径调小、动画放慢，省电也不掉帧 */
+@media (max-width: 860px) {
+  .sunwash::before {
+    filter: blur(16px);
+    animation-duration: 24s;
+  }
+  .sunwash::after {
+    filter: blur(22px);
+  }
+}
+/* 系统开了「减少动态效果」就不闪了 */
+@media (prefers-reduced-motion: reduce) {
+  .sunwash::before {
+    animation: none;
+    will-change: auto;
+  }
+}
 @keyframes sunbreathe {
   0% {
     transform: rotate(6deg) translateX(0) scaleY(1);
@@ -247,7 +301,7 @@ button {
 .grain {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: var(--z-grain);
   pointer-events: none;
   background-image: var(--noise);
   opacity: 0.045;
@@ -256,6 +310,19 @@ button {
 [data-theme="night"] .grain {
   opacity: 0.035;
   mix-blend-mode: overlay;
+}
+/* 性能：手机上「整屏混合」每帧都要重新算一遍，很吃电。
+   窄屏改成普通叠加（GPU 便宜得多），观感几乎一样。
+   想保留原来的质感：把下面整段 @media 删掉即可。 */
+@media (max-width: 860px) {
+  .grain {
+    mix-blend-mode: normal;
+    opacity: 0.022;
+  }
+  [data-theme="night"] .grain {
+    mix-blend-mode: normal;
+    opacity: 0.02;
+  }
 }
 
 /* ---------- 4. 排版 ---------- */
@@ -276,13 +343,13 @@ p {
   width: min(100% - 40px, var(--maxw));
   margin-inline: auto;
   position: relative;
-  z-index: 2;
+  z-index: var(--z-content);
 }
 .narrow {
   width: min(100% - 40px, 780px);
   margin-inline: auto;
   position: relative;
-  z-index: 2;
+  z-index: var(--z-content);
 }
 
 /* 章节标题 */
@@ -334,12 +401,20 @@ p {
   transform: translateX(3px);
 }
 
-/* ---------- 5. 导航 ---------- */
+/* ---------- 5. 导航 ----------
+   ⚠ .nav 这个类由 app.js 的 mountNav 加在页面里那个 <div id="nav"> 上（不要套额外的 div）。
+     它同时管三件事，缺一件就会出问题：
+       ① position:sticky + --z-nav —— 滚动时吸顶；
+       ② 建立层级上下文，让手机端展开的菜单压住正文（否则菜单被正文盖住、点不到）；
+       ③ 毛玻璃背景。
+     ⚠ sticky 只在「父容器」范围内生效。#nav 的父容器是 body，
+       所以能一路吸到底；千万别把它塞进某个固定高度的盒子里。 */
 .nav {
   position: sticky;
   top: 0;
-  z-index: 60;
+  z-index: var(--z-nav);
   backdrop-filter: saturate(1.3) blur(14px);
+  -webkit-backdrop-filter: saturate(1.3) blur(14px);
   background: color-mix(in srgb, var(--bg-2) 82%, transparent);
   border-bottom: 1px solid var(--line);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
@@ -348,7 +423,7 @@ p {
 .nav-inner {
   width: min(100% - 40px, var(--maxw));
   margin-inline: auto;
-  height: 66px;
+  height: var(--nav-h);
   display: flex;
   align-items: center;
   gap: 22px;
@@ -455,11 +530,18 @@ p {
   .burger {
     display: grid;
   }
+  /* 手机端：菜单从导航栏下面展开。
+     ⚠ 用 absolute 而不是 fixed：.nav 有 backdrop-filter，
+       fixed 子元素会以 .nav 为定位基准，在部分浏览器上会错位；
+       absolute 相对 .nav 定位，跟着吸顶的导航一起走，最稳。
+     ⚠ z-index 必须高于 0：它靠父级 .nav 的 --z-nav 压住正文，
+       但自己也要压住 .nav 里那条毛玻璃背景。 */
   .nav-links {
-    position: fixed;
-    top: 66px;
+    position: absolute;
+    top: 100%;
     left: 0;
     right: 0;
+    z-index: 2;
     flex-direction: column;
     align-items: stretch;
     gap: 2px;
@@ -471,11 +553,25 @@ p {
     opacity: 0;
     pointer-events: none;
     transition: 0.28s;
+    /* 菜单项多了也能滚，不会顶出屏幕外（dvh 是手机上更准的「可视高度」） */
+    max-height: calc(100vh - var(--nav-h));
+    max-height: calc(100dvh - var(--nav-h));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .nav-links.open {
     transform: none;
     opacity: 1;
     pointer-events: auto;
+  }
+  /* 收起时彻底藏起来，避免屏幕阅读器和 Tab 键还能摸到 */
+  .nav-links:not(.open) {
+    visibility: hidden;
+    transition: 0.28s, visibility 0s linear 0.28s;
+  }
+  .nav-links.open {
+    visibility: visible;
+    transition: 0.28s, visibility 0s linear 0s;
   }
   .nav-links a {
     padding: 12px 14px;
@@ -1003,7 +1099,7 @@ p {
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: var(--z-lightbox);
   background: rgba(34, 24, 14, 0.92);
   backdrop-filter: blur(6px);
   display: grid;
@@ -1191,7 +1287,7 @@ p {
   --lm-w: 940px;
   position: fixed;
   inset: 0;
-  z-index: 220;
+  z-index: var(--z-modal);
   /* 用 flex 居中：grid 的 align-content 默认是 start，会让窗格贴顶 */
   display: flex;
   align-items: center;
@@ -1580,6 +1676,538 @@ p {
   }
 }
 
+/* ---------- 11.5 实用工具（骰子 / 硬币 / 今天吃什么） ----------
+   ★改这里：想调工具卡片的大小、骰子和硬币的配色，改这一段。
+     骰子、硬币用的是固定颜色（不跟主题变），因为不管白天黑夜它们都该是实物色。
+     餐厅卡片（.food-card）用的是主题色，会自动跟日光 / 灯下切换。
+   ============================================================ */
+.tool-panel {
+  padding: clamp(20px, 3vw, 30px);
+  margin-bottom: 22px;
+}
+.tool-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.tool-icon {
+  font-size: 26px;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(150deg, var(--wood-50), var(--wood-100));
+}
+.tool-head h3 {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  margin: 2px 0 4px;
+}
+.tool-sub {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin: 0;
+  line-height: 1.6;
+}
+.tool-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.tool-label {
+  font-size: 13px;
+  color: var(--wood-500);
+  min-width: 78px;
+}
+.tool-hint {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.tool-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 6px 0 4px;
+}
+
+/* 数字按钮（选扔几颗 / 几枚） */
+.num-picks {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.num-pick {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.num-pick:hover {
+  border-color: var(--wood-300);
+  transform: translateY(-2px);
+}
+.num-pick.on {
+  background: var(--wood-500);
+  border-color: var(--wood-500);
+  color: #fffdf8;
+}
+
+/* 二选一 / 多选一的分段按钮（地区、校内校外） */
+.seg {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.seg-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.seg-btn:hover {
+  border-color: var(--wood-300);
+}
+.seg-btn.on {
+  background: var(--wood-500);
+  border-color: var(--wood-500);
+  color: #fffdf8;
+}
+
+/* 结果那一行 */
+.tool-result {
+  margin-top: 16px;
+  min-height: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.tool-sum {
+  font-size: 16px;
+  color: var(--ink);
+}
+.tool-sum b {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--amber);
+}
+.tool-detail {
+  color: var(--ink-3);
+}
+.tool-pending {
+  color: var(--wood-500);
+}
+
+/* ---- 骰子 ---- */
+.dice-tray,
+.coin-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+.die {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(155deg, #fffdf8, #f0e6d6);
+  border: 1px solid rgba(122, 86, 54, 0.28);
+  box-shadow: 0 6px 14px -8px rgba(90, 62, 38, 0.5), inset 0 -3px 6px rgba(122, 86, 54, 0.12);
+  overflow: hidden;
+}
+.die-face {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 9px;
+  gap: 2px;
+}
+.die-face i {
+  border-radius: 50%;
+}
+.die-face i.on {
+  background: #4a3a2a;
+}
+.die-num,
+.die-mid {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: #4a3a2a;
+  padding: 0;
+}
+.die.rolling {
+  animation: die-roll 0.9s cubic-bezier(0.3, 0.1, 0.3, 1) both;
+}
+.die.settled {
+  animation: die-drop 0.36s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes die-roll {
+  0% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-18px) rotate(130deg); }
+  50% { transform: translateY(0) rotate(280deg); }
+  75% { transform: translateY(-9px) rotate(430deg); }
+  100% { transform: translateY(0) rotate(720deg); }
+}
+@keyframes die-drop {
+  0% { transform: translateY(-12px) scale(1.06); opacity: 0.5; }
+  60% { transform: translateY(3px) scale(0.98); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* ---- 硬币 ---- */
+.coin {
+  width: 56px;
+  height: 56px;
+  perspective: 700px;
+}
+.coin-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 34% 28%, #fbfcfd, #c3cad2 58%, #959da6);
+  border: 2px solid #a3abb4;
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.16), 0 6px 14px -8px rgba(90, 62, 38, 0.5);
+}
+.coin-face {
+  width: 84%;
+  height: 84%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.coin-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.coin-blank {
+  background: radial-gradient(circle at 40% 34%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 60%);
+}
+.coin.flipping .coin-inner {
+  animation: coin-spin 0.5s linear infinite;
+}
+.coin.settled .coin-inner {
+  animation: coin-drop 0.42s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+@keyframes coin-spin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+@keyframes coin-drop {
+  0% { transform: translateY(-16px) scale(1.08); opacity: 0.55; }
+  60% { transform: translateY(4px) scale(0.97); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* ---- 今天吃什么 ---- */
+.food-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 14px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+.food-shuffling {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 54px 0;
+}
+.food-shuffling i {
+  width: 84px;
+  height: 118px;
+  border-radius: 14px;
+  background: linear-gradient(150deg, var(--wood-100), var(--wood-300));
+  box-shadow: var(--shadow-md);
+  animation: food-shuffle 0.7s ease-in-out infinite;
+}
+.food-shuffling i:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.food-shuffling i:nth-child(3) {
+  animation-delay: 0.24s;
+}
+@keyframes food-shuffle {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.food-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+}
+.pop-in {
+  animation: pop-in 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 照片轮播 */
+.food-shots {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--wood-50);
+  touch-action: pan-y;
+}
+.shot-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.42s cubic-bezier(0.3, 0.9, 0.3, 1);
+}
+.shot-track img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shot-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.86);
+  color: var(--wood-700);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: 0.25s;
+}
+.shot-nav:hover {
+  background: #fffdf8;
+  transform: translateY(-50%) scale(1.08);
+}
+.shot-nav.prev { left: 10px; }
+.shot-nav.next { right: 10px; }
+.shot-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+}
+.shot-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: 0.25s;
+}
+.shot-dots i.on {
+  width: 18px;
+  border-radius: 6px;
+  background: var(--amber-soft);
+}
+.shot-count {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #fffdf8;
+  background: rgba(59, 48, 41, 0.42);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.food-nophoto {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 6px;
+  color: var(--wood-500);
+  font-size: 15px;
+}
+.food-nophoto small {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* 餐厅卡文字部分 */
+.food-body {
+  padding: 22px clamp(18px, 3vw, 26px) 4px;
+}
+.food-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.food-title h3 {
+  font-family: var(--font-serif);
+  font-size: 25px;
+  margin: 0;
+}
+.food-scope {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.food-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.food-info {
+  margin: 18px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.food-info > div {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.food-info dt {
+  font-size: 13px;
+  color: var(--wood-500);
+  background: var(--wood-50);
+  border-radius: 8px;
+  padding: 3px 0;
+  text-align: center;
+}
+.food-info dd {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.6;
+}
+.food-review {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line-2);
+}
+.food-review h4 {
+  font-size: 13px;
+  color: var(--wood-500);
+  letter-spacing: 0.14em;
+  margin: 0 0 8px;
+}
+.food-review p {
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.85;
+  margin: 0 0 8px;
+}
+.food-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px clamp(18px, 3vw, 26px) 22px;
+}
+
+/* 首页那三张工具入口卡 */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.tool-entry {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 20px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: 0.3s;
+}
+.tool-entry:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--wood-300);
+}
+.tool-entry .te-icon {
+  font-size: 25px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(150deg, var(--wood-50), var(--wood-100));
+}
+.tool-entry b {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--ink);
+}
+.tool-entry .te-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+.tool-entry .te-go {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--wood-500);
+}
+@media (max-width: 560px) {
+  .tool-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tool-label {
+    min-width: 0;
+  }
+  .food-info > div {
+    grid-template-columns: 52px 1fr;
+  }
+  .die { width: 46px; height: 46px; }
+  .coin { width: 48px; height: 48px; }
+}
+
 /* ---------- 12. 时间轴 ---------- */
 .timeline {
   position: relative;
@@ -1772,7 +2400,7 @@ p {
 /* 目录 */
 .toc {
   position: sticky;
-  top: 88px;
+  top: calc(var(--nav-h) + 22px); /* 吸顶导航下面一点，别被它压住 */
   font-size: 14px;
   max-height: calc(100vh - 130px);
   overflow: auto;
@@ -1823,7 +2451,7 @@ p {
   left: 0;
   height: 3px;
   width: 0;
-  z-index: 80;
+  z-index: var(--z-progress);
   background: linear-gradient(90deg, var(--amber), var(--wood-300));
   box-shadow: 0 0 10px rgba(217, 146, 47, 0.5);
 }
@@ -1874,7 +2502,7 @@ p {
   position: fixed;
   right: 22px;
   bottom: 26px;
-  z-index: 70;
+  z-index: var(--z-totop);
   width: 46px;
   height: 46px;
   border-radius: 50%;
@@ -1903,7 +2531,7 @@ p {
 .search-panel {
   position: fixed;
   inset: 0;
-  z-index: 190;
+  z-index: var(--z-search);
   background: rgba(40, 28, 16, 0.55);
   backdrop-filter: blur(6px);
   display: grid;
@@ -2089,7 +2717,7 @@ p {
 .sunburst {
   position: fixed;
   inset: -20% -40%;
-  z-index: 130;
+  z-index: var(--z-burst);
   pointer-events: none;
   background: linear-gradient(
     105deg,

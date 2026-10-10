@@ -119,6 +119,24 @@
     if (f) lightbox.open(homeShots, Number(f.dataset.i));
   });
 
+  /* 实用工具：三张入口卡，点进去是 tools.html 对应的那个工具
+     工具的名字 / 图标 / 说明来自 data.js 第 10-1 段 TOOLS
+     ★ 想改首页显示几个 → data.js 第 9 段 HOME_LAYOUT.tools */
+  document.getElementById("homeTools").innerHTML = (TOOLS || [])
+    .slice(0, num("tools", 3))
+    .map(
+      (t) => `
+    <a class="tool-entry reveal" href="./tools.html${App.esc(t.anchor || "")}">
+      <span class="te-icon">${App.esc(t.icon || "")}</span>
+      <span>
+        <b>${App.esc(t.name || "")}</b>
+        <span class="te-desc">${App.esc(t.desc || "")}</span>
+        <span class="te-go">去用用 →</span>
+      </span>
+    </a>`
+    )
+    .join("");
+
   /* 友链：按置顶 + 加入时间排，取前 N 个
      ★ 想改显示几个 → data.js 第 9 段 HOME_LAYOUT.links
      点卡片会弹出详情窗格（和友链页一样），不直接跳转 */

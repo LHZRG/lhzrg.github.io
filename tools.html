@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>实用工具 · 语林集</title><!-- ★改这里：浏览器标签标题 -->
+    <meta name="description" content="骰子点数生成器、扔硬币、今天吃什么 —— 三个随手用的小工具。" /><!-- ★改这里：页面介绍 -->
+    <meta name="theme-color" content="#f7f1e6" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c99a63'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23fff8ec' font-family='serif'%3E语%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+  <!-- ============================================================
+       「实用工具」页
+       三个工具：① 骰子点数生成器 ② 扔硬币 ③ 今天吃什么
+
+       本文件里 ★改这里 的是「界面上写死的文字」（标题、按钮、提示语）。
+       工具里那些「能选几个」「餐厅有哪几家」都在 data.js 第 10 段：
+          工具名字 / 图标        → TOOLS
+          骰子几颗、硬币几枚     → TOOLS_CONFIG
+          地区 / 校内校外        → FOOD_AREAS
+          餐厅卡片内容           → FOOD_SPOTS
+       ============================================================ -->
+  <body>
+    <div id="nav"></div>
+
+    <main style="padding-top: 46px">
+      <div class="wrap">
+        <div class="divider-leaf" style="margin-top: 10px">实 用 工 具</div><!-- ★改这里：栏目标题 -->
+        <div class="sec-head">
+          <div>
+            <h2 class="sec-title">三个随手的小工具</h2><!-- ★改这里：标题 -->
+            <p style="color: var(--ink-3); font-size: 14px; margin: 6px 0 0">
+              拿不定主意的时候，试试让它们替你决定。<!-- ★改这里：副标题 -->
+            </p>
+          </div>
+          <a class="more-link" href="./home.html">回到首页 →</a><!-- ★改这里：右上角链接 -->
+        </div>
+
+        <!-- ============ ① 骰子点数生成器 ============ -->
+        <section class="tool-panel card reveal" id="tool-dice">
+          <div class="tool-head">
+            <span class="tool-icon" id="diceIcon">🎲</span><!-- 图标来自 data.js 的 TOOLS，这里只是没加载时的兜底 -->
+            <div>
+              <h3 id="diceName">骰子点数生成器</h3><!-- 名字来自 data.js 的 TOOLS -->
+              <p class="tool-sub" id="diceDesc">是玩几把小的好呢，还是玩几把大的？</p>
+            </div>
+          </div>
+
+          <div class="tool-row">
+            <span class="tool-label">一次扔几颗</span><!-- ★改这里：这行小标题 -->
+            <div class="num-picks" id="dicePick"></div><!-- 按钮由 data.js 的 TOOLS_CONFIG.diceMax 自动生成 -->
+          </div>
+
+          <div class="tool-actions">
+            <button class="btn" id="diceRoll">扔 一 把</button><!-- ★改这里：按钮文字 -->
+            <button class="btn ghost" id="diceClear">收起来</button><!-- ★改这里：第二个按钮 -->
+          </div>
+
+          <div class="dice-tray" id="diceTray"></div><!-- 骰子落在这里 -->
+          <div class="tool-result" id="diceResult">选好数量就可以扔了。</div><!-- ★改这里：没扔之前的提示 -->
+        </section>
+
+        <!-- ============ ② 扔硬币 ============ -->
+        <section class="tool-panel card reveal" id="tool-coin">
+          <div class="tool-head">
+            <span class="tool-icon" id="coinIcon">🪙</span>
+            <div>
+              <h3 id="coinName">扔硬币</h3>
+              <p class="tool-sub" id="coinDesc">正面是花花，反面是贵族朋友。等会帮你数正反面。</p>
+            </div>
+          </div>
+
+          <div class="tool-row">
+            <span class="tool-label">一次扔几枚</span><!-- ★改这里：这行小标题 -->
+            <div class="num-picks" id="coinPick"></div>
+          </div>
+
+          <div class="tool-actions">
+            <button class="btn" id="coinRoll">扔 一 把</button><!-- ★改这里：按钮文字 -->
+            <button class="btn ghost" id="coinClear">收起来</button>
+          </div>
+
+          <div class="coin-tray" id="coinTray"></div>
+          <div class="tool-result" id="coinResult">选好数量就可以扔了。</div>
+        </section>
+
+        <!-- ============ ③ 今天吃什么 ============ -->
+        <section class="tool-panel card reveal" id="tool-food">
+          <div class="tool-head">
+            <span class="tool-icon" id="foodIcon">🍜</span>
+            <div>
+              <h3 id="foodName">今天吃什么</h3>
+              <p class="tool-sub" id="foodDesc">先选地区和校内外，再抽一张餐厅卡。</p>
+            </div>
+          </div>
+
+          <!-- 一级：地区。选项来自 data.js 的 FOOD_AREAS -->
+          <div class="tool-row">
+            <span class="tool-label">① 地区</span><!-- ★改这里：这行小标题 -->
+            <div class="seg" id="foodArea"></div>
+          </div>
+
+          <!-- 二级：校内 / 校外。选项跟着上面选的地区变 -->
+          <div class="tool-row">
+            <span class="tool-label">② 范围</span><!-- ★改这里：这行小标题 -->
+            <div class="seg" id="foodZone"></div>
+          </div>
+
+          <div class="tool-row">
+            <span class="tool-hint" id="foodCount">—</span>
+          </div>
+
+          <div class="tool-actions">
+            <button class="btn" id="foodDraw">抽 一 张</button><!-- ★改这里：按钮文字 -->
+            <button class="btn ghost" id="foodAgain">换一家</button>
+          </div>
+
+          <div id="foodSlot"><!-- 抽出来的餐厅卡会出现在这里，内容来自 data.js 的 FOOD_SPOTS -->
+            <div class="food-empty">选好上面的范围，然后点「抽 一 张」。</div><!-- ★改这里：没抽之前的提示 -->
+          </div>
+        </section>
+
+        <div class="note-card" style="margin-top: 34px">
+          <h3>这些工具的内容在哪改？</h3>
+          <p style="margin: 0">
+            骰子最多几颗、硬币最多几枚，在 <code>data.js</code> 第 10-2 段 <code>TOOLS_CONFIG</code>；
+            地区范围和餐厅卡片，在第 10-3 段 <code>FOOD_AREAS</code> 和第 10-4 段 <code>FOOD_SPOTS</code>。
+            想加一家常去的店，复制一组改内容就行，照片丢进 <code>assets/img/food/</code> 再把路径写进 <code>photos</code>。
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/markdown.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/pages/tools.js"></script>
+  </body>
+</html>
