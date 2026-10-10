@@ -8,14 +8,14 @@ const md = fs.readFileSync(path.join(root, "assets/js/markdown.js"), "utf8");
 
 let D;
 try {
-  D = new Function(src + "\n" + md + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,Markdown});")();
+  D = new Function(src + "\n" + md + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT,Markdown});")();
 } catch (e) {
   console.log("❌ data.js 执行报错：", e.message);
   process.exit(1);
 }
 
 const Markdown = D.Markdown;
-const { SITE, POSTS, QUOTES, GALLERY, LINKS, TIMELINE, NOW, SKILLS } = D;
+const { SITE, POSTS, QUOTES, GALLERY, LINKS, TIMELINE, NOW, SKILLS, HOME_LAYOUT } = D;
 
 const problems = [], warns = [];
 const P = (m) => problems.push(m);
@@ -98,6 +98,7 @@ GALLERY.forEach((g, i) => {
   if (!isStr(g.src)) P(`GALLERY 第 ${i + 1} 张缺 src（图片路径）`);
   else if (!/^https?:/.test(g.src) && !fileOK(g.src)) P(`GALLERY 第 ${i + 1} 张图不存在：${g.src}`);
   if (!isStr(g.title)) W(`GALLERY 第 ${i + 1} 张没写 title`);
+  if (!isStr(g.date)) W(`GALLERY 第 ${i + 1} 张没写 date（拍摄日期），首页排序时它会排在最后`);
 });
 
 /* ---------- LINKS ---------- */
@@ -120,6 +121,8 @@ LINKS.forEach((l, i) => {
   if (l.snapDate && !/^\d{4}-\d{2}-\d{2}$/.test(l.snapDate))
     W(`LINKS 第 ${i + 1} 个的 snapDate 建议写成 2026-10-09 这种格式：${l.snapDate}`);
   if (l.tags && !Array.isArray(l.tags)) W(`LINKS 第 ${i + 1} 个的 tags 不是 [ ] 数组`);
+  if (!l.added && !l.known)
+    W(`LINKS 第 ${i + 1} 个既没写 added（加入日期）也没写 known，排序时它会排在最后`);
   const revLen = Array.isArray(l.review) ? l.review.join("").length : (l.review || "").length;
   console.log("   " + String(l.name).padEnd(12) + (l.snap ? "有快照" : "无快照") + "  评价 " + String(revLen).padStart(3) + " 字");
 });
@@ -147,6 +150,33 @@ SKILLS.forEach((s, i) => {
   if (typeof s.value !== "number" || s.value < 0 || s.value > 100)
     P(`SKILLS 第 ${i + 1} 项的 value 要填 0~100 的数字，现在是 ${s.value}`);
 });
+
+/* ---------- HOME_LAYOUT（首页每个栏目显示几条 + 排序方式） ---------- */
+console.log("\n【首页栏目设置 HOME_LAYOUT】");
+const LAY = HOME_LAYOUT || {};
+const ORDERS = ["pinned-first", "unpinned-first", "date-first"];
+if (!HOME_LAYOUT) W("没找到 HOME_LAYOUT（data.js 第 9 段），首页会按默认值显示：文章 4 / 照片 6 / 友链 4 / 此刻 3");
+[
+  ["posts", POSTS.length, "文章"],
+  ["gallery", GALLERY.length, "照片"],
+  ["links", LINKS.length, "友链"],
+  ["now", NOW.length, "此刻"],
+].forEach(([key, total, label]) => {
+  const v = LAY[key];
+  if (v === undefined) { W(`HOME_LAYOUT.${key} 没填，${label}会显示全部 ${total} 条`); return; }
+  if (typeof v !== "number" || !Number.isInteger(v) || v < 1)
+    P(`HOME_LAYOUT.${key} 要填一个大于 0 的整数，现在是 ${v}`);
+  else console.log(`   ${label}：首页显示 ${Math.min(v, total)} / 共 ${total} 条`);
+});
+if (LAY.order !== undefined && !ORDERS.includes(LAY.order))
+  P(`HOME_LAYOUT.order 只能填这三个之一：${ORDERS.join(" / ")}，现在是 "${LAY.order}"`);
+else console.log("   排序：" + (LAY.order || "pinned-first") + "（置顶在前）· " + (LAY.dateDesc === false ? "旧的在前" : "新的在前"));
+const pinnedPosts = POSTS.filter((p) => p.pinned).length;
+const pinnedShots = GALLERY.filter((g) => g.pinned).length;
+const pinnedLinks = LINKS.filter((l) => l.pinned).length;
+console.log(`   已置顶：文章 ${pinnedPosts} 篇 / 照片 ${pinnedShots} 张 / 友链 ${pinnedLinks} 个`);
+if (pinnedPosts >= POSTS.length && POSTS.length > 0) W("所有文章都置顶了，置顶就失去意义了");
+if (pinnedLinks >= LINKS.length && LINKS.length > 0) W("所有友链都置顶了，置顶就失去意义了");
 
 /* ---------- 汇总 ---------- */
 console.log("\n══════ 体检结果 ══════");

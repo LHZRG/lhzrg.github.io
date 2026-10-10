@@ -8,8 +8,14 @@
   const grid = document.getElementById("galleryGrid");
   document.getElementById("shotNum").textContent = GALLERY.length;
 
+  /* 排序规则和首页一致：置顶在前，其余按时间。
+     ★ 想改顺序 → data.js 第 9 段 HOME_LAYOUT.order / dateDesc
+     ★ 想让某张照片排最前 → GALLERY 里给它写 pinned: true
+     这个页面显示全部照片，不受 HOME_LAYOUT.gallery 数量限制 */
+  const shots = App.sortItems(GALLERY);
+
   grid.innerHTML = [
-    ...GALLERY.map(
+    ...shots.map(
       (g, i) => `
       <figure class="shot reveal" data-i="${i}">
         <img src="${App.esc(g.src)}" alt="${App.esc(g.title)}" loading="lazy">
@@ -28,11 +34,11 @@
 
   grid.addEventListener("click", (e) => {
     const f = e.target.closest(".shot[data-i]");
-    if (f) lightbox.open(GALLERY, Number(f.dataset.i));
+    if (f) lightbox.open(shots, Number(f.dataset.i));
   });
 
   document.getElementById("shuffle").onclick = () =>
-    lightbox.open(GALLERY, Math.floor(Math.random() * GALLERY.length));
+    lightbox.open(shots, Math.floor(Math.random() * shots.length));
 
   App.reveal();
 })();

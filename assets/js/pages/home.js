@@ -3,12 +3,26 @@
      首页显示的那些东西，去 data.js 改：
        个人介绍 / 标签 / 联系方式 → SITE
        此刻（在读在听在拍）        → NOW
-       精选文章的选取规则          → 见下面「精选文章」那一段
+       文章                       → POSTS
        图片墙                     → GALLERY
        友情链接                   → LINKS
+
+   ★ 首页每个栏目显示几条、按什么顺序排 → data.js 第 9 段 HOME_LAYOUT
+     （posts / gallery / links / now 四个数字 + order 排序方式）
+     本文件只是照着 HOME_LAYOUT 的数字切一刀，想改数量别来这里改。
  */
 (() => {
   const { lightbox, linkModal } = App.init("home.html");
+
+  /* 读取首页栏目设置：每个栏目显示几条
+     ★ 想改数量请去 data.js 第 9 段 HOME_LAYOUT，不要在下面改数字 */
+  const LAY = typeof HOME_LAYOUT === "object" && HOME_LAYOUT ? HOME_LAYOUT : {};
+  const num = (key, fallback) => {
+    const v = Number(LAY[key]);
+    return v > 0 ? v : fallback;
+  };
+  /* 友链的时间取 added（加上的日期），没写就退回 known（认识于） */
+  const linkTime = (l) => l.added || l.known || "";
 
   /* Hero */
   document.getElementById("heroImg").src = SITE.heroImage;
@@ -57,25 +71,33 @@
       </div>
     </div>`;
 
-  /* 此刻 */
-  document.getElementById("nowGrid").innerHTML = NOW.map(
-    (n) => `
+  /* 此刻（显示几条 = HOME_LAYOUT.now） */
+  document.getElementById("nowGrid").innerHTML = NOW.slice(0, num("now", NOW.length))
+    .map(
+      (n) => `
     <div class="now-card reveal">
       <div class="now-k">${App.esc(n.k)}</div>
       <div class="now-v">${App.esc(n.v)}</div>
       <p class="now-note">${App.esc(n.note)}</p>
     </div>`
-  ).join("");
+    )
+    .join("");
 
-  /* 精选文章：置顶优先，其次按时间，取 4 篇
-     ★改这里：想把首页显示的文章变多一点 / 少一点，改下面的 .slice(0, 4) 数字即可 */
-  const picks = App.sortedPosts()
-    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
-    .slice(0, 4);
+  /* 精选文章：按 HOME_LAYOUT 的排序规则（置顶 + 时间）排好，再取前 N 篇
+     ★ 想改显示几篇 → data.js 第 9 段 HOME_LAYOUT.posts
+     ★ 想改排序方式 → data.js 第 9 段 HOME_LAYOUT.order */
+  const picks = App.sortItems(POSTS).slice(0, num("posts", 4));
   document.getElementById("postGrid").innerHTML = picks.map(App.postCard).join("");
 
-  /* 图片墙 */
-  const shots = [...GALLERY, { placeholder: true, title: "光影待续", place: "下一张由你来拍" }];
+  /* 图片墙：同样按置顶 + 时间排，取前 N 张
+     ★ 想改显示几张 → data.js 第 9 段 HOME_LAYOUT.gallery
+     ★ 照片置顶：在 GALLERY 里给那张照片写 pinned: true
+     末尾那张「光影待续」只是装饰，只有当首页把所有照片都显示完时才出现 */
+  const homeShots = App.sortItems(GALLERY).slice(0, num("gallery", 6));
+  const showMore = num("gallery", 6) >= GALLERY.length;
+  const shots = showMore
+    ? [...homeShots, { placeholder: true, title: "光影待续", place: "下一张由你来拍" }]
+    : homeShots;
   document.getElementById("homeMasonry").innerHTML = shots
     .map(
       (g, i) =>
@@ -94,11 +116,11 @@
 
   document.getElementById("homeMasonry").addEventListener("click", (e) => {
     const f = e.target.closest(".shot[data-i]");
-    if (f) lightbox.open(GALLERY, Number(f.dataset.i));
+    if (f) lightbox.open(homeShots, Number(f.dataset.i));
   });
 
-  /* 友链（首页取前 4）
-     ★改这里：想在首页多显示几个邻居，改下面 LINKS.slice(0, 4) 的数字
+  /* 友链：按置顶 + 加入时间排，取前 N 个
+     ★ 想改显示几个 → data.js 第 9 段 HOME_LAYOUT.links
      点卡片会弹出详情窗格（和友链页一样），不直接跳转 */
   const linkCard = (l, i) => `
     <a class="link-card reveal" href="${App.esc(l.url)}" target="_blank" rel="noopener" data-i="${i}">
@@ -107,7 +129,7 @@
       <span class="link-info"><b>${App.esc(l.name)}</b><span>${App.esc(l.desc)}</span></span>
       <span class="link-peek" aria-hidden="true">→</span>
     </a>`;
-  const homeLinkList = LINKS.slice(0, 4);
+  const homeLinkList = App.sortItems(LINKS, linkTime).slice(0, num("links", 4));
   document.getElementById("homeLinks").innerHTML = homeLinkList.map(linkCard).join("");
   document.getElementById("homeLinks").addEventListener("click", (e) => {
     const card = e.target.closest(".link-card[data-i]");

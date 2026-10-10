@@ -1978,8 +1978,10 @@ p {
 }
 
 /* ---------- 15. 页脚 ---------- */
+/* ★改这里：最后一个栏目（比如首页的友情链接）和页脚之间的空白大小。
+   margin-top 越大，中间留白越多。想更挤就改小一点 */
 .footer {
-  margin-top: clamp(60px, 9vw, 110px);
+  margin-top: clamp(104px, 15vw, 180px);
   padding: 44px 0 34px;
   border-top: 1px solid var(--line);
   background: linear-gradient(var(--wood-50), transparent);

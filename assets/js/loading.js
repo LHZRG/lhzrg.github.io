@@ -37,7 +37,7 @@
     qBox.classList.remove("out");
     void qBox.offsetWidth;
     qBox.classList.add("in");
-    if (first) setTimeout(() => qBox.classList.remove("in"), 1000);
+    if (first) setTimeout(() => qBox.classList.remove("in"), 2000);
   };
   showQuote(qi, true);
   setInterval(() => {
@@ -58,15 +58,15 @@
   /* ★改这里：进度条下方的加载提示文案。
      格式：[进度百分比, 该进度时显示的文字]，随意增删，句子不用押韵 */
   const STATUS = [
-    [0, "正在擦亮窗玻璃…"],
+    [0, "正在擦亮玻璃…"],
     [22, "把椅子搬到光里…"],
-    [46, "先泡一杯水…"],
+    [46, "先泡一杯茉莉花茶…"],
     [70, "摊开今天的小说…"],
     [92, "正在组织麻雀…"],
-    [100, "光刚好可以进来了"],
+    [100, "光线刚好，可以进来了喵"],
   ];
   const T0 = performance.now();
-  const MIN_MS = 2400; // ★改这里：加载页最短停留时间（毫秒），2400 = 2.4 秒
+  const MIN_MS = 3000; // ★改这里：加载页最短停留时间（毫秒），2400 = 2.4 秒
 
   const fill = $("#barFill");
   const pct = $("#pct");
@@ -112,10 +112,10 @@
         clearInterval(tick);
         fill.style.width = "100%";
         pct.textContent = "100%";
-        status.textContent = "光刚好，可以进来了";
+        status.textContent = "光线刚好，可以进来了喵";
         door.disabled = false;
         door.classList.add("ready");
-        hint.textContent = "按回车也可以推门 · 门后是 语林集"; // ★改这里：按钮下方那行小提示
+        hint.textContent = "尝试越过最后的门扉"; // ★改这里：按钮下方那行小提示
       }, 420);
     }, wait);
   }

@@ -17,10 +17,15 @@ const DATA = (() => {
     );
     // 用 new Function 包一层，比 eval + 替换 const 更稳（也不会误伤文件内容）
     const D = new Function(
-      src + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS});"
+      src + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT});"
     )();
     const tags = new Set();
     D.POSTS.forEach((p) => (p.tags || []).forEach((t) => tags.add(t)));
+    const L = D.HOME_LAYOUT || {};
+    const cnt = (k, all) => {
+      const v = Number(L[k]);
+      return v > 0 ? Math.min(v, all) : all;
+    };
     return {
       ok: true,
       posts: D.POSTS.length,
@@ -31,6 +36,13 @@ const DATA = (() => {
       timeline: D.TIMELINE.length,
       now: D.NOW.length,
       socials: D.SITE.socials.length,
+      /* 首页每个栏目按 HOME_LAYOUT 的数字显示几条 */
+      homePosts: cnt("posts", D.POSTS.length),
+      homeGallery: cnt("gallery", D.GALLERY.length),
+      homeLinks: cnt("links", D.LINKS.length),
+      homeNow: cnt("now", D.NOW.length),
+      /* 首页图片墙末尾那张「光影待续」占位卡，只在照片全部显示完时才出现 */
+      galleryPlaceholder: Number(L.gallery) > 0 && Number(L.gallery) < D.GALLERY.length ? 0 : 1,
     };
   } catch (e) {
     console.log("❌ data.js 读不了：" + e.message + "\n   先把 data.js 修好再跑测试。\n");
@@ -40,7 +52,11 @@ const DATA = (() => {
 if (!DATA.ok) process.exit(1);
 console.log(
   "数据体检：" + DATA.posts + " 篇文章 / " + DATA.gallery + " 张照片 / " +
-    DATA.links + " 个友链 / " + DATA.socials + " 项联系方式\n"
+    DATA.links + " 个友链 / " + DATA.socials + " 项联系方式"
+);
+console.log(
+  "首页显示：" + DATA.homePosts + " 篇文章 / " + DATA.homeGallery + " 张照片 / " +
+    DATA.homeLinks + " 个友链 / " + DATA.homeNow + " 项此刻\n"
 );
 
 const BASE = process.env.BASE || "http://127.0.0.1:8123";
@@ -56,11 +72,11 @@ const PAGES = [
     ["搜索面板", d.querySelector("#searchPanel") !== null, true],
     ["回到顶部", d.querySelector("#toTop") !== null, true],
     ["导航链接", d.querySelectorAll("#nav .nav-links a").length, 5],
-    ["精选文章卡", d.querySelectorAll("#postGrid .post-card").length, Math.min(4, DATA.posts)],
-    ["首页图片墙", d.querySelectorAll("#homeMasonry .shot").length, DATA.gallery + 1],
+    ["精选文章卡", d.querySelectorAll("#postGrid .post-card").length, DATA.homePosts],
+    ["首页图片墙", d.querySelectorAll("#homeMasonry .shot").length, DATA.homeGallery + DATA.galleryPlaceholder],
     ["个人介绍", d.querySelector("#profile").textContent.trim().length > 50, true],
-    ["此刻卡片", d.querySelectorAll("#nowGrid .now-card").length, DATA.now],
-    ["首页友链", d.querySelectorAll("#homeLinks .link-card").length, Math.min(4, DATA.links)],
+    ["此刻卡片", d.querySelectorAll("#nowGrid .now-card").length, DATA.homeNow],
+    ["首页友链", d.querySelectorAll("#homeLinks .link-card").length, DATA.homeLinks],
   ], async (d, w) => {
     /* 首页的友链卡片也应该弹出同一个详情窗格 */
     const card = d.querySelector("#homeLinks .link-card[data-i]");

@@ -17,7 +17,8 @@
      ⑥ mountLightbox  图片点开看大图
      ⑦ mountToTop     回到顶部按钮 + 顶部阅读进度条
      ⑧ reveal         往下滚动时内容浮现的动画
-     ⑨ postCard       文章卡片的样式模板
+     ⑨ sortItems      栏目排序（置顶 + 时间），首页 / 图片页 / 友链页共用
+     ⑩ postCard       文章卡片的样式模板
    ============================================================ */
 
 const App = (() => {
@@ -148,13 +149,17 @@ const App = (() => {
       0,
       Math.floor((Date.now() - new Date(SITE.since.replace(/-/g, "/")).getTime()) / 86400000)
     );
+    /* ★ 外面这层 class="footer" 不能删：页脚的留白、那条细分割线、
+         从上往下淡出的暖色底，全都挂在它身上（见 main.css「15. 页脚」）。
+         想改「最后一个栏目到页脚之间留多少空」→ 搜 main.css 里的 .footer */
     el.innerHTML = `
+      <div class="footer">
       <div class="wrap">
         <div class="footer-grid">
           <div>
             <h4>${esc(SITE.name)} · ${esc(SITE.latin)}</h4><!-- 左栏：站名 + 英文名，来自 data.js 的 SITE -->
             <p>${esc(SITE.heroQuote)}</p><!-- 主标语，来自 data.js 的 SITE.heroQuote -->
-            <p style="font-size:13px;color:var(--ink-3)">午后斜阳里的一间小馆，随手写，随便看。</p><!-- ★改这里：站名下那行小字 -->
+            <p style="font-size:13px;color:var(--ink-3)">午后斜阳里的小馆</p><!-- ★改这里：站名下那行小字 -->
           </div>
           <div>
             <h4>栏目</h4><!-- ★改这里：中栏标题 -->
@@ -173,7 +178,7 @@ const App = (() => {
               ${SITE.socials
                 .map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a></li>`)
                 .join("")}
-              <li><a href="./links.html#apply">申请友链</a></li><!-- ★改这里：右栏最后一项 -->
+              <li><a href="./links.html#apply">交换友链</a></li><!-- ★改这里：右栏最后一项 -->
             </ul>
           </div>
         </div>
@@ -181,6 +186,7 @@ const App = (() => {
           <span>© ${new Date().getFullYear()} ${esc(SITE.author)} · 本站已亮灯 ${days} 天</span><!-- 年份和天数自动算 -->
           <span>由木头、阳光和一点点 JavaScript 搭成</span><!-- ★改这里：右下角一句话 -->
         </div>
+      </div>
       </div>`;
   }
 
@@ -490,7 +496,35 @@ const App = (() => {
     });
   }
 
-  /* ---------- ⑨ 文章卡片模板（首页、文章列表页共用） ---------- */
+  /* ---------- ⑨ 栏目排序：置顶 + 时间（首页 / 图片页 / 友链页共用） ----------
+     怎么排由 data.js 第 9 段 HOME_LAYOUT 决定，不用改这里：
+       order:    "pinned-first"   置顶的排最前，其余按时间排（默认）
+                 "unpinned-first" 未置顶的排最前，置顶的排后面
+                 "date-first"     只看时间，不管置顶与否
+       dateDesc: true = 新的在前（默认），false = 旧的在前
+
+     第二个参数 getTime 用来说明「这一项的时间取哪个字段」；
+     不传就默认按顺序找 date → added → known。 */
+  function sortItems(list, getTime) {
+    const cfg = typeof HOME_LAYOUT === "object" && HOME_LAYOUT ? HOME_LAYOUT : {};
+    const order = cfg.order || "pinned-first";
+    const desc = cfg.dateDesc !== false;
+    const time = (x) => String((getTime ? getTime(x) : x.date || x.added || x.known) || "");
+    return [...list].sort((a, b) => {
+      const pa = a.pinned ? 1 : 0;
+      const pb = b.pinned ? 1 : 0;
+      if (pa !== pb) {
+        if (order === "pinned-first") return pb - pa; // 置顶的靠前
+        if (order === "unpinned-first") return pa - pb; // 未置顶的靠前
+      }
+      const ta = time(a);
+      const tb = time(b);
+      if (ta === tb) return 0;
+      return (ta > tb ? -1 : 1) * (desc ? 1 : -1);
+    });
+  }
+
+  /* ---------- ⑩ 文章卡片模板（首页、文章列表页共用） ---------- */
   // 里面用到的数据全都来自 data.js 里那一篇文章的字段：cover / date / title / excerpt / tags
   function postCard(p) {
     return `
@@ -543,6 +577,7 @@ const App = (() => {
     postUrl,
     sortedPosts,
     allTags,
+    sortItems,
     postCard,
     openSearch,
     reveal,

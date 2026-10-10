@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>语林集 · 推门之前</title><!-- ★改这里：浏览器标签页上的标题 -->
+    <title>语林集 · 门扉之前</title><!-- ★改这里：浏览器标签页上的标题 -->
     <meta name="description" content="午后斜阳里的一间小馆。写字、拍照、慢慢生活。" /><!-- ★改这里：搜索结果里显示的一句话介绍 -->
     <meta name="theme-color" content="#f2e6d2" /><!-- 手机浏览器地址栏颜色，跟着背景色走就行 -->
     <!-- 浏览器小图标（橙色方块里一个「语」字）。想换别的字：把下面两处「语」改掉即可 -->
@@ -32,7 +32,7 @@
         <div class="mark">语</div><!-- ★改这里：左上角圆印章里的字，一般取站名第一个字 -->
         <div>
           <div class="t1">语林集</div><!-- ★改这里：左上角的站点名称 -->
-          <div class="t2">YU LIN JI · SINCE 2026</div><!-- ★改这里：名称下面的英文小字，可写成 owner · since 2026 之类 -->
+          <div class="t2">YU LIN JI · 2026</div><!-- ★改这里：名称下面的英文小字，可写成 owner · since 2026 之类 -->
         </div>
       </header>
 
@@ -48,7 +48,7 @@
           <div class="bar"><i id="barFill"></i></div>
           <div class="status">
             <!-- 阶段提示文案在 assets/js/loading.js 的 STATUS 数组里改 -->
-            <span id="status">正在擦亮窗玻璃…</span><span id="pct">0%</span>
+            <span id="status">正在擦亮玻璃…</span><span id="pct">0%</span>
           </div>
         </div>
 
@@ -60,7 +60,7 @@
 
       <footer class="bot">
         <span>© 2026 大大大椰子</span><!-- ★改这里：左下角版权署名 -->
-        <span>午后 · 有光 · 慢慢来</span><!-- ★改这里：右下角一句话 -->
+        <span>喵喵喵？</span><!-- ★改这里：右下角一句话 -->
       </footer>
     </div>
 
@@ -102,10 +102,10 @@
         setTimeout(function () {
           if (typeof SITE === "undefined" || typeof QUOTES === "undefined") {
             tip(
-              "像是 <b>assets/js/data.js</b> 里有语法错误（多半是漏了逗号或引号），<br>" +
-                "请打开它检查一下最后改动的那几行。<br>3 秒后先放你进首页。"
+              "像是 <b>assets/js/data.js</b> 里有语法错误（大概漏了逗号或引号），<br>" +
+                "请打开它检查一下最后改动的那几行。<br>5 秒后先放你进去。"
             );
-            setTimeout(go, 3000);
+            setTimeout(go, 5000);
           }
         }, 800);
         // ② 文件没毛病，但进度迟迟不动（比如某个图片地址卡住）
@@ -113,7 +113,7 @@
           var el = document.getElementById("pct");
           if (el && el.textContent.replace("%", "").trim() === "0") {
             tip("加载似乎卡住了，先带你进首页看看。");
-            setTimeout(go, 1500);
+            setTimeout(go, 5000);
           }
         }, 5000);
       })();

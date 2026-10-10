@@ -22,7 +22,12 @@
       <span class="link-peek" aria-hidden="true">→</span>
     </a>`;
 
-  grid.innerHTML = LINKS.map(cardHTML).join("");
+  /* 排序规则和首页一致：置顶在前，其余按 added（加入时间）排。
+     ★ 想改顺序 → data.js 第 9 段 HOME_LAYOUT.order / dateDesc
+     ★ 想让某个友链排最前 → LINKS 里给它写 pinned: true
+     这个页面显示全部友链，不受 HOME_LAYOUT.links 数量限制 */
+  const list = App.sortItems(LINKS, (l) => l.added || l.known || "");
+  grid.innerHTML = list.map(cardHTML).join("");
 
   /* 点卡片：不跳转，弹出详情
      Ctrl / ⌘ / Shift + 点击时不拦截，照旧让浏览器在新标签页打开 */
@@ -31,12 +36,12 @@
     if (!card) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
-    linkModal.open(LINKS[Number(card.dataset.i)]);
+    linkModal.open(list[Number(card.dataset.i)]);
   });
 
   /* 随机串门 */
   document.getElementById("randLink").onclick = () => {
-    const l = LINKS[Math.floor(Math.random() * LINKS.length)];
+    const l = list[Math.floor(Math.random() * list.length)];
     window.open(l.url, "_blank", "noopener");
   };
 
