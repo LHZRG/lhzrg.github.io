@@ -104,6 +104,33 @@ window.__overflowX = function () {
   return { ok: document.documentElement.scrollWidth <= innerWidth + 1,
            why: document.documentElement.scrollWidth + ' > ' + innerWidth };
 };
+/* 逐个量所有元素：有没有谁伸到屏幕右边外面去了。
+   （body 上开了 overflow-x: clip，横向滚动条不会出现，
+     但内容会变成「看得见却滑不到」，只能这样才查得出来） */
+window.__stuckOut = function () {
+  var bad = [];
+  /* 在「可横向滚动」的盒子里超出去是允许的（宽表格就是这么设计的，
+     用户能滑到），只有那些滑不到的才是真的丢了 */
+  var inScroller = function (el) {
+    for (var p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      var ox = getComputedStyle(p).overflowX;
+      if (ox === 'auto' || ox === 'scroll') return true;
+    }
+    return false;
+  };
+  document.querySelectorAll('body *').forEach(function (el) {
+    var cs = getComputedStyle(el);
+    if (cs.position === 'fixed' || cs.display === 'none') return;
+    var r = el.getBoundingClientRect();
+    if (inScroller(el)) return;
+    if (r.width < 1 || r.height < 1) return;
+    if (r.right > innerWidth + 2 || r.left < -2) {
+      bad.push(el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : '') +
+               ' [' + Math.round(r.left) + '→' + Math.round(r.right) + ']');
+    }
+  });
+  return { ok: bad.length === 0, why: bad.slice(0, 4).join(' ｜ ') || '没有伸出去的元素' };
+};
 `;
 
 /* ---------------- 用例 ---------------- */
@@ -195,6 +222,8 @@ async function main() {
       await open(page, 420, 860, true);
       const ov = await ev("__overflowX()");
       check(`[手机420] ${page} 无横向溢出`, ov.ok, ov.why);
+      const so = await ev("__stuckOut()");
+      check(`[手机420] ${page} 没有内容滑不到（伸出屏幕外）`, so.ok, so.why);
     }
 
     if (go("nav")) {
@@ -441,6 +470,8 @@ async function main() {
       check("[桌面] 文章页回到顶部可点击", h.ok, h.why);
       const ovp = await ev("__overflowX()");
       check("[桌面] 文章页无横向溢出", ovp.ok, ovp.why);
+      const sop = await ev("__stuckOut()");
+      check("[桌面] 文章页没有内容伸出屏幕外", sop.ok, sop.why);
 
       /* 吸顶的导航不能把「跳过去的标题」压住 */
       await ev("document.querySelector('#toc a').click()");
@@ -463,6 +494,159 @@ async function main() {
           "return {navBottom:Math.round(n.bottom),top:Math.round(t.getBoundingClientRect().top)}})()"
       );
       check("[手机] 页脚「交换友链」跳转后没被导航压住", ap.top >= ap.navBottom - 1, JSON.stringify(ap));
+    }
+
+    /* ---- 条目式（wiki 体例）文章：宽表格 / 信息卡 / 徽章 / 分类盒 ---- */
+    if (go("wiki")) {
+      await open("post.html?id=richimaj-", 420, 860, true);
+      // 找「正文里带表格」的那篇（也就是 wiki 体例那篇），找不到就退回第一篇
+      const wid = await ev("(POSTS.find(p=>/\\|\\s*-{3,}/.test(p.body))||POSTS[0]).id");
+      await open("post.html?id=" + wid, 420, 860, true);
+      await sleep(500);
+      let w = await ev("__overflowX()");
+      check("[手机] 条目式文章无横向溢出", w.ok, w.why);
+      w = await ev("__stuckOut()");
+      check("[手机] 没有元素伸到屏幕右边界之外", w.ok, w.why);
+      w = await ev(
+        "(()=>{var t=document.querySelector('.tw-wide');if(!t)return{ok:false,why:'没找到宽表格'};" +
+          "return {ok:t.scrollWidth>t.clientWidth+10,why:'内容宽'+t.scrollWidth+' 可视宽'+t.clientWidth}})()"
+      );
+      check("[手机] 宽表格在自己的小盒子里可左右滑", w.ok, w.why);
+      w = await ev(
+        "(()=>{var b=document.querySelector('.wk-infobox');if(!b)return{ok:false,why:'没找到信息卡'};" +
+          "var r=b.getBoundingClientRect(),p=b.parentElement.getBoundingClientRect();" +
+          "return {ok:Math.abs(r.width-p.width)<40,why:'卡宽'+Math.round(r.width)+' 容器宽'+Math.round(p.width)}})()"
+      );
+      check("[手机] 信息卡自动变成整块（不再浮右）", w.ok, w.why);
+      w = await ev("document.querySelectorAll('.wk-b').length>0");
+      check("[手机] 番数徽章已渲染", w === true, String(w));
+      w = await ev("__reach('.wk-cat a')");
+      check("[手机] 文末分类标签可点击", w.ok, w.why);
+      w = await ev("__reach('.tw-hint')");
+      check("[手机] 宽表格有「左右滑动」提示", w.ok, w.why);
+
+      /* 所有配图（含中文路径）都要真的加载成功：
+         这一条同时回答了「图片路径里能不能写中文」——能，浏览器会自动做百分号编码 */
+      await open("post.html?id=" + wid, 1280, 900, false);
+      await sleep(600);
+      await ev("document.querySelectorAll('#content img').forEach(i=>i.loading='eager')");
+      await ev(
+        "(()=>{var h=document.body.scrollHeight;for(var y=0;y<h;y+=700){window.scrollTo(0,y)}})()"
+      );
+      await sleep(2500);
+      w = await ev(
+        "(()=>{var im=[...document.querySelectorAll('#content img')];" +
+          "var bad=im.filter(i=>!i.complete||i.naturalWidth===0).map(i=>i.getAttribute('src'));" +
+          "return {ok:im.length>0&&bad.length===0,why:'共 '+im.length+' 张，加载失败 '+bad.length+(bad.length?'：'+bad[0]:'')}})()"
+      );
+      check("[桌面] 正文配图全部加载成功（中文路径）", w.ok, w.why);
+
+      await open("post.html?id=" + wid, 1280, 900, false);
+      await sleep(500);
+      w = await ev(
+        "(()=>{var b=document.querySelector('.wk-infobox');var r=b.getBoundingClientRect()," +
+          "p=b.parentElement.getBoundingClientRect();" +
+          "return {ok:r.right>p.left+p.width*0.6,why:'卡右缘'+Math.round(r.right)+' 容器右缘'+Math.round(p.right)}})()"
+      );
+      check("[桌面] 信息卡浮在右上角", w.ok, w.why);
+      w = await ev("__overflowX()");
+      check("[桌面] 条目式文章无横向溢出", w.ok, w.why);
+      w = await ev(
+        "(()=>{var h=document.querySelector('.tw-hint');" +
+          "return {ok:!!h&&getComputedStyle(h).display==='none',why:h?getComputedStyle(h).display:'没找到提示'}})()"
+      );
+      check("[桌面] 宽表格不显示滑动提示", w.ok, w.why);
+    }
+
+    /* ---- 麻将牌编码 [mj ...]：三种形状必须各自等高、且竖牌与横牌对齐 ---- */
+    if (go("mj") || go("wiki")) {
+      await open("post.html?id=richimaj-", 1280, 900, true);
+      await sleep(300);
+      /* 页面里临时注入一组牌，量它们的真实渲染尺寸。
+         关键断言：同一形状内尺寸必须完全一致（否则牌会大小不一）；
+         竖牌的高 == 横牌的宽（这是「一块牌」的基准边长）。 */
+      await ev(
+        "(()=>{var d=document.createElement('div');d.id='mjprobe';" +
+          "d.className='prose';d.innerHTML=Markdown.render(" +
+          "'[mj 1m 2m 3m 9s dong]\\n\\n[mj h1m h2m | k11m]');" +
+          "document.body.appendChild(d);" +
+          "d.querySelectorAll('img.mj').forEach(i=>i.loading='eager');" +
+          "return true})()"
+      );
+      /* 等到所有牌图真的解码完再量尺寸 —— 固定 sleep 在慢机器上会量到 0 宽。 */
+      for (let k = 0; k < 25; k++) {
+        const r = await ev(
+          "(()=>{var im=[...document.querySelectorAll('#mjprobe img.mj')];" +
+            "return im.length>0 && im.every(i=>i.complete && i.naturalWidth>0)})()"
+        );
+        if (r) break;
+        await sleep(300);
+      }
+      await sleep(200);
+      let m = await ev(
+        "(()=>{var im=[...document.querySelectorAll('#mjprobe img.mj')];" +
+          "if(!im.length)return{ok:false,why:'一张牌都没渲染'};" +
+          "var bad=im.filter(i=>!i.complete||i.naturalWidth===0);" +
+          "return{ok:bad.length===0,why:'共 '+im.length+' 张，加载失败 '+bad.length}})()"
+      );
+      check("[牌] 编码渲染出的牌图全部加载成功", m.ok, m.why);
+
+      m = await ev(
+        "(()=>{var g={};document.querySelectorAll('#mjprobe img.mj').forEach(i=>{" +
+          "var k=i.className.replace('mj mj-','');" +
+          "var r=i.getBoundingClientRect();" +
+          "(g[k]=g[k]||[]).push(Math.round(r.width*10)/10+'x'+Math.round(r.height*10)/10)});" +
+          "var bad=[];for(var k in g){var u=[...new Set(g[k])];" +
+          "if(u.length>1)bad.push(k+' 尺寸不齐: '+u.join(' / '))}" +
+          "return{ok:bad.length===0,why:bad.length?bad.join('; '):'竖牌/横牌/杠图各形状内尺寸完全一致'}})()"
+      );
+      check("[牌] 同一形状的牌尺寸完全一致（不会大小不一）", m.ok, m.why);
+
+      m = await ev(
+        "(()=>{var vt=document.querySelector('#mjprobe img.mj-vt');" +
+          "var hz=document.querySelector('#mjprobe img.mj-hz');" +
+          "if(!vt||!hz)return{ok:false,why:'没找到竖牌或横牌'};" +
+          "var a=vt.getBoundingClientRect(),b=hz.getBoundingClientRect();" +
+          "return{ok:Math.abs(a.height-b.width)<1.5," +
+          "why:'竖牌高 '+Math.round(a.height)+' vs 横牌宽 '+Math.round(b.width)}})()"
+      );
+      check("[牌] 竖牌高 = 横牌宽（一块牌的基准边长一致）", m.ok, m.why);
+
+      /* 只查「同一个 .mj-set 内」的相邻牌 —— 组与组之间（| 分隔的副露）
+         是刻意留的分组缝，不算间隙 bug。 */
+      m = await ev(
+        "(()=>{var gap=0,where='';" +
+          "document.querySelectorAll('#mjprobe .mj-set').forEach(s=>{" +
+          "var im=[...s.querySelectorAll('img.mj')];" +
+          "for(var i=1;i<im.length;i++){" +
+          "var p=im[i-1].getBoundingClientRect(),q=im[i].getBoundingClientRect();" +
+          "var g=q.left-p.right; if(g>gap){gap=g;where=im[i-1].alt+'|'+im[i].alt}}});" +
+          "return{ok:gap<1,why:'同组内最大间隙 '+Math.round(gap*10)/10+'px'+(where?'（'+where+'）':'（紧贴）')}})()"
+      );
+      check("[牌] 同一组内牌与牌紧贴（无额外间隙）", m.ok, m.why);
+
+      /* 副露分组：| 两侧的组之间要能看出分界 */
+      m = await ev(
+        "(()=>{var s=[...document.querySelectorAll('#mjprobe .mj-set')];" +
+          "if(s.length<2)return{ok:true,why:'本次样例没有副露分组'};" +
+          "var a=s[0].getBoundingClientRect(),b=s[1].getBoundingClientRect();" +
+          "var row=s[0].parentNode.getBoundingClientRect();" +
+          "var info='组1['+Math.round(a.left)+','+Math.round(a.top)+' '+Math.round(a.width)+'x'+Math.round(a.height)+']" +
+          " 组2['+Math.round(b.left)+','+Math.round(b.top)+'] 行宽'+Math.round(row.width);" +
+          "if(Math.abs(a.top-b.top)>6)return{ok:true,why:'两组换行了（容器窄）— '+info};" +
+          "var g=b.left-a.right;" +
+          "return{ok:g>3&&g<32,why:'副露分组间距 '+Math.round(g)+'px — '+info}})()"
+      );
+      check("[牌] 副露分组（| 分隔）有明显但不夸张的间距", m.ok, m.why);
+
+      /* 无损校验：产物像素必须够原图分辨率（防止有人为了体积去降采样） */
+      m = await ev(
+        "(()=>{var vt=document.querySelector('#mjprobe img.mj-vt');" +
+          "if(!vt)return{ok:false,why:'没找到竖牌'};" +
+          "return{ok:vt.naturalWidth>=272&&vt.naturalHeight>=389," +
+          "why:'竖牌原图 '+vt.naturalWidth+'x'+vt.naturalHeight+'（应为 272x389，未降采样）'}})()"
+      );
+      check("[牌] 牌图保持原始分辨率（未被降采样）", m.ok, m.why);
     }
 
     ws.close();

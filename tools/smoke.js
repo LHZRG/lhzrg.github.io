@@ -22,6 +22,16 @@ const DATA = (() => {
     )();
     const tags = new Set();
     D.POSTS.forEach((p) => (p.tags || []).forEach((t) => tags.add(t)));
+    /* 文章页测「列表里第一篇」：以后增删文章、改标题，测试都跟着走，不会写死 */
+    const first = D.POSTS[0] || { id: "", title: "", body: "" };
+    const firstBody =
+      typeof first.body === "string" ? first.body : (first.body || []).join("\n");
+    const firstToc = firstBody.split("\n").filter((l) => /^#{2,3}\s/.test(l.trim())).length;
+    /* 找一篇含表格的条目式文章（比如 wiki 体例的役种表），测它的表格渲染 */
+    const wiki = D.POSTS.find((p) => {
+      const b = typeof p.body === "string" ? p.body : (p.body || []).join("\n");
+      return /\|\s*-{3,}/.test(b);
+    });
     const L = D.HOME_LAYOUT || {};
     const cnt = (k, all) => {
       const v = Number(L[k]);
@@ -44,6 +54,11 @@ const DATA = (() => {
       homeNow: cnt("now", D.NOW.length),
       homeTools: cnt("tools", (D.TOOLS || []).length),
       tools: (D.TOOLS || []).length,
+      firstId: first.id,
+      firstTitle: first.title,
+      firstToc,
+      giscus: !!(D.SITE.giscus && D.SITE.giscus.enabled && D.SITE.giscus.repoId),
+      wikiId: wiki ? wiki.id : "",
       areas: (D.FOOD_AREAS || []).length,
       spots: (D.FOOD_SPOTS || []).length,
       /* 实用工具的参数（骰子最多几颗、动画多长），测试按它来等动画 */
@@ -105,14 +120,33 @@ const PAGES = [
     ["标签按钮(全部+去重标签)", d.querySelectorAll("#tagBar .filter-chip").length, DATA.tags + 1],
     ["文章总数", d.querySelector("#totalNum").textContent, String(DATA.posts)],
   ]],
-  ["post.html?id=afternoon-light", (d) => [
-    ["标题", d.querySelector("#title").textContent.includes("下午三点"), true],
+  [`post.html?id=${DATA.firstId}`, (d) => [
+    ["标题", d.querySelector("#title").textContent.includes(DATA.firstTitle), true],
     ["正文段落", d.querySelectorAll("#content p").length > 4, true],
-    ["目录项", d.querySelectorAll("#toc a").length, 3],
+    ["目录项", d.querySelectorAll("#toc a").length, DATA.firstToc],
     ["上下篇", d.querySelectorAll("#postNav a").length, 2],
     ["相关文章", d.querySelectorAll("#related .post-card").length > 0, true],
-    ["评论区", d.querySelector("#giscus").textContent.trim().length > 10, true],
+    /* 评论区：在 data.js 里打开了 Giscus 就是一段远程 script，没打开就是「还没通电」的说明卡 */
+    ["评论区", DATA.giscus
+      ? /giscus\.app\/client\.js/.test(d.querySelector("#giscus").innerHTML)
+      : d.querySelector("#giscus").textContent.trim().length > 10, true],
   ]],
+  /* 条目式（wiki 体例）文章：表格、信息卡、徽章都要渲染出来 */
+  ...(DATA.wikiId
+    ? [[`post.html?id=${DATA.wikiId}`, (d) => [
+        ["表格已渲染", d.querySelectorAll("#content .tw table").length >= 5, true],
+        ["宽表有滚动外壳", d.querySelector("#content .tw-wide") !== null, true],
+        ["信息卡（:::infobox）", d.querySelector("#content .wk-infobox") !== null, true],
+        ["导语（:::lead）", d.querySelector("#content .wk-lead") !== null, true],
+        ["提示条 / 注意条", d.querySelectorAll("#content .wk-tip, #content .wk-warn").length >= 2, true],
+        ["分类盒（:::cat）", d.querySelectorAll("#content .wk-cat a").length > 0, true],
+        ["番数徽章", d.querySelectorAll("#content .wk-b").length > 0, true],
+        /* Excel 式合并单元格：^ 要真的变成 rowspan，且同一箇「块」共用底色 */
+        ["合并单元格生效", d.querySelectorAll("#content td[rowspan]").length >= 60, true],
+        ["合并后每组同底色", d.querySelectorAll("#content tr.alt td[rowspan]").length > 0, true],
+        ["表格里的配图", d.querySelectorAll("#content td img").length >= 35, true],
+      ]]]
+    : []),
   ["post.html?id=not-exist", (d) => [
     ["不存在的文章显示 404", d.querySelector(".nf") !== null, true],
   ]],

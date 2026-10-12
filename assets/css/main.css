@@ -2397,8 +2397,404 @@ p {
   font-family: var(--font-serif);
 }
 
-/* 目录 */
-.toc {
+/* ---------- 13.5 Wiki 体例组件（写条目式长文时用） ----------
+   ★ 用法（直接写在文章正文里，也就是 data.js 的 POSTS → body）：
+       :::lead           开头第一段，做成「导语」：字号大一点、下面一条细线
+       :::infobox        右上方浮起的信息卡；手机上自动变成整块卡片
+                         卡里的表格第一行（表头）会自动隐掉，
+                         所以直接写两列「属性 | 值」就行
+       :::tip            绿色提示条
+       :::warn           琥珀色注意条
+       :::cat            文末分类盒，里面的列表会变成一排小标签
+       {{1番}} {{役满}}   行内小徽章，写「役满 / 双倍役满 / 满贯」会自动换色
+     每个容器最后都要单独写一行 ::: 表示结束。
+   ------------------------------------------------------------ */
+.wk {
+  margin: 22px 0;
+}
+
+/* 导语：百科条目开头那句「XX 是……」 */
+.wk-lead {
+  font-family: var(--font-serif);
+  font-size: 17.5px;
+  line-height: 1.95;
+  color: var(--ink-2);
+  padding-bottom: 20px;
+  margin: 4px 0 32px;
+  border-bottom: 1px solid var(--line);
+}
+.wk-lead p {
+  margin: 0;
+}
+.wk-lead strong {
+  color: var(--wood-700);
+}
+
+/* 信息卡：桌面浮在右上，手机变成一整块 */
+.wk-infobox {
+  float: right;
+  width: 272px;
+  margin: 4px 0 18px 28px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  font-size: 14.5px;
+}
+.wk-infobox > p:first-child {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--wood-50);
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 16.5px;
+  font-weight: 700;
+  color: var(--wood-700);
+}
+.wk-infobox .tw {
+  margin: 0;
+}
+.wk-infobox thead {
+  display: none; /* 表头那行只是给渲染器看的，卡片里不显示 */
+}
+.wk-infobox td {
+  padding: 9px 14px;
+  border: none;
+  border-bottom: 1px dashed var(--line);
+  background: none;
+  font-size: 14px;
+}
+.wk-infobox tr:last-child td {
+  border-bottom: none;
+}
+.wk-infobox td:first-child {
+  width: 38%;
+  color: var(--ink-3);
+}
+@media (max-width: 720px) {
+  .wk-infobox {
+    float: none;
+    width: 100%;
+    margin: 20px 0;
+  }
+}
+
+/* 提示条 / 注意条 */
+.wk-tip,
+.wk-warn {
+  position: relative;
+  margin: 28px 0;
+  padding: 18px 18px 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--leaf);
+  border-radius: var(--radius-s);
+  background: color-mix(in srgb, var(--leaf) 7%, var(--paper));
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.wk-warn {
+  border-left-color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 9%, var(--paper));
+}
+.wk-tip::before,
+.wk-warn::before {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  line-height: 20px;
+}
+.wk-tip::before {
+  content: "提示";
+  color: var(--leaf);
+}
+.wk-warn::before {
+  content: "注意";
+  color: var(--amber);
+}
+.wk-tip p:last-child,
+.wk-warn p:last-child {
+  margin: 0;
+}
+
+/* 文末分类盒 */
+.wk-cat {
+  margin-top: 46px;
+  padding: 16px 18px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--radius-s);
+  background: color-mix(in srgb, var(--wood-50) 55%, transparent);
+  font-size: 14px;
+}
+.wk-cat > p:first-child {
+  margin: 0 0 12px;
+  font-size: 11.5px;
+  letter-spacing: 0.22em;
+  color: var(--ink-3);
+}
+.wk-cat ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+.wk-cat li {
+  margin: 0;
+}
+.wk-cat a {
+  display: inline-block;
+  padding: 3px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-size: 13.5px;
+  transition: 0.2s;
+}
+.wk-cat a:hover {
+  border-color: var(--wood-300);
+  color: var(--wood-500);
+  background: color-mix(in srgb, var(--wood-50) 60%, var(--paper));
+}
+
+/* 徽章：{{1番}} {{役满}} {{双倍役满}} */
+.wk-b {
+  display: inline-block;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--wood-50);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+.wk-b-ym {
+  background: color-mix(in srgb, var(--amber) 26%, var(--paper));
+  border-color: color-mix(in srgb, var(--amber) 45%, transparent);
+  color: var(--wood-700);
+  font-weight: 600;
+}
+.wk-b-ym2 {
+  background: linear-gradient(135deg, var(--amber), #c0701a);
+  border-color: transparent;
+  color: #fffaf0;
+  font-weight: 700;
+}
+.wk-b-bm,
+.wk-b-tm,
+.wk-b-mg {
+  background: color-mix(in srgb, var(--leaf) 16%, var(--paper));
+  border-color: color-mix(in srgb, var(--leaf) 40%, transparent);
+  color: var(--leaf);
+  font-weight: 600;
+}
+
+/* 表格：.tw 是滚动外壳，列多的表在手机上左右滑，不会撑破页面 */
+.twbox {
+  position: relative;
+}
+.tw-hint {
+  display: none; /* 只在窄屏出现（见下），桌面端表格放得下，不需要提示 */
+}
+.prose .tw {
+  margin: 22px 0;
+  max-width: 100%; /* 兜底：哪怕父级被内容顶宽，这个盒子也不许超出 */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.prose .tw > table {
+  margin: 0;
+}
+.prose td,
+.prose th {
+  vertical-align: top;
+}
+.prose tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--wood-50) 40%, transparent);
+}
+.prose tbody tr:hover {
+  background: color-mix(in srgb, var(--amber) 9%, transparent);
+}
+@media (max-width: 760px) {
+  /* 4 列以上的表：保住一个好读的宽度，在这只盒子里面滑。
+     640px 是试出来的：再窄下去「成立要点」那列就变成一列竖条字了 */
+  .prose .tw-wide > table {
+    min-width: 640px;
+  }
+  /* 窄屏给一句「可以左右滑」，不然会以为右半边根本没有内容 */
+  .twbox .tw-hint {
+    display: block;
+    text-align: right;
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    margin: -16px 2px 0;
+  }
+  .prose .twbox .tw {
+    margin-bottom: 20px;
+  }
+  /* 合并表在手机上把内边距收一收：前三列省下的宽度都留给「要点 · 牌姿」那一列 */
+  .prose .tw-merge th,
+  .prose .tw-merge td {
+    padding: 7px 8px;
+  }
+  .prose .tw-merge td:first-child {
+    font-size: 15px;
+  }
+}
+
+/* 合并单元格的表（表格里用了 ^ 或 < 时会自动加上 .tw-merge） */
+.tw-merge > table {
+  table-layout: auto;
+}
+.tw-merge th {
+  text-align: center;
+}
+.tw-merge td,
+.tw-merge th {
+  vertical-align: middle;
+}
+/* 第一列放行名字，别让它折成两行（「门前清自摸和」这种） */
+.tw-merge td:first-child {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: center;
+}
+.tw-merge td:nth-child(3) {
+  text-align: center;
+  white-space: nowrap;
+}
+/* 被合并的格子竖直居中，淡一点，让「一块一块」的感觉更清楚 */
+.tw-merge td[rowspan] {
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  vertical-align: middle;
+}
+/* 一组（比如一个役占的两行）同色：关掉按行的斑马纹，改用奇偶组 */
+.tw-merge tbody tr:nth-child(even),
+.tw-merge tbody tr:hover {
+  background: none;
+}
+.tw-merge tbody tr.alt td {
+  background: color-mix(in srgb, var(--wood-50) 45%, transparent);
+}
+.tw-merge tbody tr.alt td[rowspan] {
+  background: color-mix(in srgb, var(--wood-50) 75%, var(--paper));
+}
+/* 表格里的图片单独占一行显示（这样「上文字、下配图」不用额外语法） */
+.prose td img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0 4px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+/* ---------- 13.6 麻将牌（[mj ...] 编码） ----------
+   核心：三种原图的长宽比不同，必须用不同属性缩放，否则大小对不上。
+     竖牌 272×389      → 按高度 = --mj-h
+     横牌 360×301      → 按宽度 = --mj-h（长边对齐竖牌的高）
+     杠图 360×569      → 按宽度 = --mj-h
+   牌与牌之间零间隙、紧贴排列（正文里不写空格即可）；牌组整体垂直居中。 */
+.prose,
+.wk {
+  --mj-h: 36px; /* 竖牌高 = 横牌/杠图的宽，改这一个数全站生效 */
+}
+.mj-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  vertical-align: middle;
+  line-height: 0;
+  /* 牌行内部排版与外界隔离，滚动/换主题时不会带着整页重排 */
+  contain: layout style;
+}
+.mj-set {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+/* 副露组之间留一点缝，跟手牌区分开（| 分隔产生的第二组起） */
+.mj-set + .mj-set {
+  margin-left: 0.85em;
+}
+.mj {
+  display: block;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  flex: none;
+  image-rendering: auto;
+}
+/* 正文里的牌行不要被 .prose img / .prose td img 的圆角、阴影、边距、max-width 污染。
+   ⚠️ 必须写在形状规则**前面**：两者特异性相同时靠顺序决胜，
+   而下面的 .prose .mj-vt 等选择器特异性更高，能压过 `.prose td img`。 */
+.prose .mj,
+.prose td .mj,
+.prose .mj-row img {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+  max-width: none; /* 解开全局 img{max-width:100%} 对牌的限制 */
+  display: block;
+  font-size: 0; /* 图片加载完成前 alt 文字不会溢出成一块碎字；牌码同时写在 alt 里便于排查 */
+  overflow: hidden;
+  color: transparent;
+}
+/* ★改这里：三种形状的「原始宽高比」，与 compress_tiles.py 的画布上限一致。
+   用 aspect-ratio 锁死比例，浏览器算出的像素绝对统一 ——
+   即使某一张素材比例略有偏差，也不会出现「这张牌比那张宽一点」。
+   ⚠️ 选择器必须带 `.prose` 前缀：`.prose td img {height:auto}` 的特异性是 (0,2,1)，
+   只写 `.mj-vt`(0,1,0) 会被它盖掉 → 牌会按原始 389px 高度铺满整屏。 */
+.prose .mj-vt,
+.wk .mj-vt {
+  height: var(--mj-h);
+  width: auto;
+  aspect-ratio: 272 / 389; /* 竖牌 */
+}
+.prose .mj-hz,
+.wk .mj-hz {
+  width: var(--mj-h);
+  height: auto;
+  aspect-ratio: 360 / 302; /* 横牌（竖牌转 90°） */
+}
+.prose .mj-kan,
+.wk .mj-kan {
+  width: var(--mj-h);
+  height: auto;
+  aspect-ratio: 360 / 569; /* 杠图（两张横牌竖叠） */
+}
+/* 表格里的牌姿窄，允许换行 + 居中；并解除单元格的左边距对齐 */
+.prose td .mj-row {
+  margin: 3px 0;
+}
+.prose td .mj-set:first-child {
+  margin-left: 0;
+}
+@media (max-width: 760px) {
+  .prose,
+  .wk {
+    --mj-h: 28px;
+  }
+}
   position: sticky;
   top: calc(var(--nav-h) + 22px); /* 吸顶导航下面一点，别被它压住 */
   font-size: 14px;
@@ -2432,13 +2828,18 @@ p {
 }
 .post-layout {
   display: grid;
-  grid-template-columns: 1fr 210px;
+  /* ★ minmax(0, 1fr) 而不是 1fr：栅格列默认会被内容顶宽，
+     正文里放一张宽表格时，整个页面就会被撑出屏幕（而 body 上的
+     overflow-x: clip 会把多出来的部分藏掉，变成「看得见却滑不到」）。
+     写成 minmax(0, 1fr) 后，列宽不被内容绑架，宽表格只在自己的
+     小盒子里横向滚动。 */
+  grid-template-columns: minmax(0, 1fr) 210px;
   gap: 40px;
   align-items: start;
 }
 @media (max-width: 1000px) {
   .post-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .toc {
     display: none;

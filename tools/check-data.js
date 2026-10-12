@@ -77,16 +77,48 @@ POSTS.forEach((p, i) => {
   const html = Markdown.render(body);
   const ps = (html.match(/<p>/g) || []).length;
   const h2 = (html.match(/<h2/g) || []).length;
-  console.log("   " + String(p.id).padEnd(20) + String(ps).padStart(3) + " 段 " + String(h2).padStart(2) + " 小标题  " + (Array.isArray(p.tags) ? p.tags.join(",") : ""));
-  // 精确统计纯文字行：排除空行、Markdown 标记行、以及 ``` 代码块内部的行
-  let plain = 0, inFence = false;
-  body.split("\n").map((s) => s.trim()).forEach((l) => {
-    if (/^```/.test(l)) { inFence = !inFence; return; }
-    if (inFence || !l) return;
-    if (/^(#{1,6}\s|>|[-*+]\s|\d+\.\s|\|)/.test(l)) return;
-    plain++;
+  /* 正文里引用的本地图片必须真实存在（外链不管）。
+     中文路径也能用，但万一文件名打错一格，页面上就是一张裂图。 */
+  let imgs = 0;
+  (body.match(/!\[[^\]]*\]\(([^)\s]+)/g) || []).forEach((m) => {
+    const src = m.replace(/^!\[[^\]]*\]\(/, "");
+    if (/^(https?:|data:)/.test(src)) return;
+    imgs++;
+    if (!fileOK(src)) P(`${tag} 正文引用的图片不存在：${src}`);
   });
-  if (ps < plain - 1) W(`${tag}：${plain} 行纯文字只渲染出 ${ps} 段，可能漏了段落之间的空字符串 ""`);
+  /* [mj ...] 麻将牌编码：渲染器认不出的牌码会被静默丢掉，
+     所以在数据层拦一道 —— 把渲染出的 <img class="mj"> 逐一验文件，
+     并且在「原文写了牌码但一张没渲染出来」时报警（多半是牌码写错）。 */
+  let tiles = 0;
+  (html.match(/<img class="mj[^"]*" src="([^"]+)"/g) || []).forEach((m) => {
+    const src = m.replace(/^.*src="/, "").replace(/"$/, "");
+    tiles++;
+    if (!fileOK(src)) P(`${tag} 麻将牌编码指向的图不存在：${src}`);
+  });
+  const mjBlocks = (body.match(/\[mj\s+[^\]]*\]/gi) || []).length;
+  if (mjBlocks > 0 && tiles === 0) {
+    P(`${tag} 写了 [mj ...] 牌码，但一张牌都没渲染出来（牌码写错了？）`);
+  }
+  console.log(
+    "   " + String(p.id).padEnd(20) + String(ps).padStart(3) + " 段 " +
+      String(h2).padStart(2) + " 小标题 " + String(imgs).padStart(3) + " 张图 " +
+      String(tiles).padStart(3) + " 张牌  " +
+      (Array.isArray(p.tags) ? p.tags.join(",") : "")
+  );
+  /* 统计「应该有几段文字」：连续的非空纯文字行会被渲染器合并成一段，
+     所以这里也按「块」来数（和真实渲染行为一致），空行、标题、列表、引用、
+     表格、代码块、::: 容器标记都会打断一个块。 */
+  let blocks = 0, inFence = false, inBlock = false;
+  body.split("\n").map((s) => s.trim()).forEach((l) => {
+    if (/^```/.test(l)) { inFence = !inFence; inBlock = false; return; }
+    if (inFence || !l) { inBlock = false; return; }
+    if (/^(#{1,6}\s|>|[-*+]\s|\d+[.)]\s|\||:::)/.test(l) || /^(-{3,}|\*{3,})$/.test(l)) {
+      inBlock = false;
+      return;
+    }
+    if (!inBlock) { inBlock = true; blocks++; }
+  });
+  if (ps < blocks) W(`${tag}：${blocks} 段文字只渲染出 ${ps} 段，可能漏了段落之间的空字符串 ""`);
   if (html.includes("undefined") || html.includes("[object Object]"))
     P(`${tag} 渲染出现异常内容（可能有引号没配对）`);
 });
