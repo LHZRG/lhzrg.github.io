@@ -306,12 +306,25 @@ const Markdown = (() => {
 
       // 表格
       if (/^\s*\|.*\|\s*$/.test(line) && i + 1 < lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1])) {
-        const cells = (r) =>
-          r
-            .trim()
-            .replace(/^\||\|$/g, "")
-            .split("|")
-            .map((c) => c.trim());
+        /* 按 | 切出每一格。
+           ⚠️ 不能直接 split("|")：牌姿编码 [mj 234m | 567p | 55p] 里的 |
+           是「面子之间的分隔」，不是列分隔，一刀切会把一格拆成五列。
+           所以逐字符扫，遇到 [mj ...] 就整段跳过，里面的 | 原样保留。 */
+        const cells = (r) => {
+          const s = r.trim().replace(/^\||\|$/g, "");
+          const out = [];
+          let cur = "";
+          let inMj = false;
+          for (let k = 0; k < s.length; k++) {
+            const c = s[k];
+            if (!inMj && c === "[" && /^\[mj\s/i.test(s.slice(k))) { inMj = true; cur += c; continue; }
+            if (inMj && c === "]") { inMj = false; cur += c; continue; }
+            if (!inMj && c === "|") { out.push(cur); cur = ""; continue; }
+            cur += c;
+          }
+          out.push(cur);
+          return out.map((c) => c.trim());
+        };
         const head = cells(line);
         i += 2;
         const rows = [];
