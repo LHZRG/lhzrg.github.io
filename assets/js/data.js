@@ -494,7 +494,7 @@ const POSTS = [
       "## 参考资料",
       "1. [日本麻将 · 维基百科](https://zh.wikipedia.org/wiki/日本麻将)",
       "2. [麻雀の役一覧 · 日本語版 Wikipedia](https://ja.wikipedia.org/wiki/麻雀の役)",
-      "3. [役种表 · 日本麻雀百科](http://wiki.lingshangkaihua.com/mediawiki/inedx.php/役種表)"
+      "3. [役种表 · 日本麻雀百科](http://wiki.lingshangkaihua.com/mediawiki/inedx.php/役種表)",
       "4. 日本麻雀連合「公式ルール」、线上麻雀平台（天凤 / 雀魂 / 雀姬）规则说明",
       "",
       ":::warn",
