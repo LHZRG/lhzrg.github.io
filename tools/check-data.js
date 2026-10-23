@@ -1,16 +1,15 @@
-/* 临时体检脚本：按 data.js 真实字段结构逐项检查 */
+/* 临时体检脚本：按 content/ 真实字段结构逐项检查 */
 const fs = require("fs");
 const path = require("path");
 const root = path.join(__dirname, "..");
 
-const src = fs.readFileSync(path.join(root, "assets/js/data.js"), "utf8");
 const md = fs.readFileSync(path.join(root, "assets/js/markdown.js"), "utf8");
 
 let D;
 try {
-  D = new Function(src + "\n" + md + "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT,TOOLS,TOOLS_CONFIG,FOOD_AREAS,FOOD_SPOTS,Markdown});")();
+  D = require("./load-content").load(md);
 } catch (e) {
-  console.log("❌ data.js 执行报错：", e.message);
+  console.log("❌ content/ 执行报错：", e.message);
   process.exit(1);
 }
 
@@ -251,7 +250,7 @@ console.log("【餐厅卡片】", (FOOD_SPOTS || []).length, "家");
 console.log("\n【首页栏目设置 HOME_LAYOUT】");
 const LAY = HOME_LAYOUT || {};
 const ORDERS = ["pinned-first", "unpinned-first", "date-first"];
-if (!HOME_LAYOUT) W("没找到 HOME_LAYOUT（data.js 第 9 段），首页会按默认值显示：文章 4 / 照片 6 / 友链 4 / 此刻 3");
+if (!HOME_LAYOUT) W("没找到 HOME_LAYOUT（content/ 对应分类文件中的），首页会按默认值显示：文章 4 / 照片 6 / 友链 4 / 此刻 3");
 [
   ["posts", POSTS.length, "文章"],
   ["gallery", GALLERY.length, "照片"],
@@ -279,3 +278,5 @@ console.log("\n══════ 体检结果 ══════");
 if (!problems.length) console.log("✅ 没发现错误，数据完好");
 else { console.log("❌ " + problems.length + " 个错误："); problems.forEach((m) => console.log("   · " + m)); }
 if (warns.length) { console.log("⚠️  " + warns.length + " 个提醒："); warns.forEach((m) => console.log("   · " + m)); }
+
+if (problems.length) process.exitCode = 1;

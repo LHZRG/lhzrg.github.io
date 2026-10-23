@@ -22,11 +22,11 @@
       <div class="nf">
         <div>
           <div class="nf-num">404</div>
-          <h2 style="font-size: 24px; margin-bottom: 10px">这一页的灯没开喵</h2><!-- ★改这里：大标题下的副标题 -->
-          <p>疑似有猫娘把路牌撞歪了。要不回门口看看吧？</p><!-- ★改这里：说明句子 -->
+          <h2 style="font-size: 24px; margin-bottom: 10px" data-copy="text01">这一页的灯没开喵</h2><!-- ★改这里：大标题下的副标题 -->
+          <p data-copy="text02">疑似有猫娘把路牌撞歪了。要不回门口看看吧？</p><!-- ★改这里：说明句子 -->
           <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap">
-            <a class="btn" href="./home.html">回到首页</a><!-- ★改这里：第一个按钮 -->
-            <a class="btn ghost" href="./blog.html">去看文章</a><!-- ★改这里：第二个按钮 -->
+            <a class="btn" href="./home.html" data-copy="text03">回到首页</a><!-- ★改这里：第一个按钮 -->
+            <a class="btn ghost" href="./blog.html" data-copy="text04">去看文章</a><!-- ★改这里：第二个按钮 -->
           </div>
         </div>
       </div>
@@ -34,7 +34,26 @@
 
     <div id="footer"></div>
 
-    <script src="./assets/js/data.js"></script>
+    <!-- 内容文件：修改指南见 content/README.md；顺序与 content/files.json 保持一致。 -->
+    <script src="./content/shared/site.js"></script>
+    <script src="./content/shared/profile.js"></script>
+    <script src="./content/shared/navigation.js"></script>
+    <script src="./content/shared/footer.js"></script>
+    <script src="./content/pages/home.js"></script>
+    <script src="./content/pages/loading.js"></script>
+    <script src="./content/pages/about.js"></script>
+    <script src="./content/pages/post.js"></script>
+    <script src="./content/gallery/photos.js"></script>
+    <script src="./content/links/friends.js"></script>
+    <script src="./content/tools/config.js"></script>
+    <script src="./content/tools/food-areas.js"></script>
+    <script src="./content/tools/food-spots.js"></script>
+    <script src="./content/posts/index.js"></script>
+    <script src="./content/posts/richimaj-start.js"></script>
+    <script src="./content/posts/last-ten-minutes.js"></script>
+    <script src="./content/posts/riichimaj-yaku-list.js"></script>
+    <script src="./content/pages/not-found.js"></script>
+    <script src="./assets/js/page-copy.js"></script>
     <script src="./assets/js/markdown.js"></script>
     <script src="./assets/js/app.js"></script>
     <script>

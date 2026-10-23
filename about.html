@@ -12,63 +12,71 @@
     />
     <link rel="stylesheet" href="./assets/css/main.css" />
   </head>
-  <!-- ============================================================
-       「关于」页
-       带 id 的容器由 data.js 自动填：#profile(个人介绍)、#skillList(能力条)、
-       #timeline(时间轴)、#contactRow(联系方式)。
-       👉 改这些内容去 assets/js/data.js 的第 1 段 SITE、第 6 段 TIMELINE、第 8 段 SKILLS。
-       下面 ★改这里 的是写在本文件里的说明文字。
-       ============================================================ -->
+  <!-- 关于页文案：content/pages/about-copy.js；时间轴与能力条：content/pages/about.js。 详细说明见 content/README.md。 -->
   <body>
     <div id="nav"></div>
 
     <main style="padding-top: 46px">
       <div class="wrap">
-        <div class="divider-leaf" style="margin-top: 10px">关 于 这 里</div><!-- ★改这里：栏目标题 -->
+        <div class="divider-leaf" style="margin-top: 10px" data-copy="text01">关 于 这 里</div><!-- ★改这里：栏目标题 -->
         <div class="card profile reveal" id="profile"></div>
 
-        <div class="divider-leaf">一 点 本 事</div><!-- ★改这里：栏目标题 -->
+        <div class="divider-leaf" data-copy="text02">一 点 本 事</div><!-- ★改这里：栏目标题 -->
         <div class="card reveal" style="padding: 26px clamp(20px, 4vw, 34px)">
-          <p style="color: var(--ink-3); font-size: 14px; margin-top: 0">
+          <p style="color: var(--ink-3); font-size: 14px; margin-top: 0" data-copy="text08">
             仅供本人吹水使用，不具有现实意义。<!-- ★改这里：能力条上方那句免责声明 -->
           </p>
-          <div class="skill-list" id="skillList"></div><!-- 数据来自 data.js 的 SKILLS -->
+          <div class="skill-list" id="skillList"></div><!-- 数据来自 content/ 的 SKILLS -->
         </div>
 
-        <div class="divider-leaf">走 过 的 路</div><!-- ★改这里：栏目标题 -->
-        <div class="timeline reveal" id="timeline"></div><!-- 数据来自 data.js 的 TIMELINE -->
+        <div class="divider-leaf" data-copy="text03">走 过 的 路</div><!-- ★改这里：栏目标题 -->
+        <div class="timeline reveal" id="timeline"></div><!-- 数据来自 content/ 的 TIMELINE -->
 
-        <div class="divider-leaf">这 间 小 馆</div><!-- ★改这里：栏目标题 -->
+        <div class="divider-leaf" data-copy="text04">这 间 小 馆</div><!-- ★改这里：栏目标题 -->
         <div class="note-card reveal">
-          <h3>关于语林集</h3><!-- ★改这里：小标题 -->
-          <p>
-            <!-- ★改这里：关于本站的一段自述（可以直接改成你自己的版本） -->
-            本站建于 2026 年秋天。所有文章都存在一个叫
-            <code>data.js</code> 的文件里。
-            ————我想让你在读到第一个字之前，先让我想到你。
-          </p>
+          <h3 data-copy="text05">关于语林集</h3><!-- ★改这里：小标题 -->
+          <p data-copy="siteDescription">本站建于 2026 年秋天。所有文章都存在 content/posts/ 目录里。————我想让你在读到第一个字之前，先让我想到你。</p>
           <p style="margin-bottom: 0">
             <!-- ★改这里：下面这段话引用了站内文章《我用三个周末…》，
                  如果你把那篇文章删了，记得把这里的链接也一并删掉或改掉 -->
             源码开放。技术细节在
-            <a href="./post.html?id=build-blog" style="color: var(--wood-500)">《这里是占位符》</a>
-            里。<!-- ↑ 链接里的 id=build-blog 必须和 data.js 里那篇文章的 id 一致 -->
+            <a href="./post.html?id=build-blog" style="color: var(--wood-500)" data-copy="text06">《这里是占位符》</a>
+            里。<!-- ↑ 链接里的 id=build-blog 必须和 content/ 里那篇文章的 id 一致 -->
           </p>
         </div>
 
-        <div class="divider-leaf">如 何 找 我</div><!-- ★改这里：栏目标题 -->
+        <div class="divider-leaf" data-copy="text07">如 何 找 我</div><!-- ★改这里：栏目标题 -->
         <div class="card reveal" style="padding: 26px clamp(20px, 4vw, 34px)">
-          <p style="margin-top: 0">
+          <p style="margin-top: 0" data-copy="text09">
             本人长期睡大觉，日常沟通请在社交平台留言。<!-- ★改这里：联系方式上方的说明 -->
           </p>
-          <div class="social-row" id="contactRow"></div><!-- 数据来自 data.js 的 SITE.socials -->
+          <div class="social-row" id="contactRow"></div><!-- 数据来自 content/ 的 SITE.socials -->
         </div>
       </div>
     </main>
 
     <div id="footer"></div>
 
-    <script src="./assets/js/data.js"></script>
+    <!-- 内容文件：修改指南见 content/README.md；顺序与 content/files.json 保持一致。 -->
+    <script src="./content/shared/site.js"></script>
+    <script src="./content/shared/profile.js"></script>
+    <script src="./content/shared/navigation.js"></script>
+    <script src="./content/shared/footer.js"></script>
+    <script src="./content/pages/home.js"></script>
+    <script src="./content/pages/loading.js"></script>
+    <script src="./content/pages/about.js"></script>
+    <script src="./content/pages/post.js"></script>
+    <script src="./content/gallery/photos.js"></script>
+    <script src="./content/links/friends.js"></script>
+    <script src="./content/tools/config.js"></script>
+    <script src="./content/tools/food-areas.js"></script>
+    <script src="./content/tools/food-spots.js"></script>
+    <script src="./content/posts/index.js"></script>
+    <script src="./content/posts/richimaj-start.js"></script>
+    <script src="./content/posts/last-ten-minutes.js"></script>
+    <script src="./content/posts/riichimaj-yaku-list.js"></script>
+    <script src="./content/pages/about-copy.js"></script>
+    <script src="./assets/js/page-copy.js"></script>
     <script src="./assets/js/markdown.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/pages/about.js"></script>

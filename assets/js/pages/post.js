@@ -1,9 +1,4 @@
-/* 文章详情页
-   ⚠ 这个文件不含任何文章内容 —— 文章都在 data.js 的 POSTS 里，
-     打开 post.html?id=文章id 时自动去取那篇。
-     想改某一篇的文字 / 封面 / 标签：data.js 第 3 段。
-     想开评论区：data.js 第 1 段 SITE.giscus。
- */
+/* 页面渲染逻辑；改内容请查 content/README.md。 */
 (() => {
   App.init("blog.html");
 
@@ -100,7 +95,7 @@
   }
 
   /* 评论 */
-  const g = SITE.giscus;
+  const g = POST_CONFIG.giscus;
   document.getElementById("giscus").innerHTML = g.enabled && g.repoId
     ? `<script src="https://giscus.app/client.js"
          data-repo="${App.esc(g.repo)}" data-repo-id="${App.esc(g.repoId)}"
@@ -113,7 +108,7 @@
          <p style="margin:0">这个位置预留给了 Giscus（基于 GitHub Discussions，静态站免后端）。启用方法：</p>
          <ul>
            <li>去 <a href="https://giscus.app" target="_blank" rel="noopener" style="color:var(--wood-500)">giscus.app</a> 填写你的仓库，拿到 repoId 和 categoryId</li>
-           <li>打开 <code>assets/js/data.js</code>，把 <code>SITE.giscus</code> 里的几项填上，并把 <code>enabled</code> 改成 <code>true</code></li>
+           <li>打开 <code>content/（见 content/README.md）</code>，把 <code>POST_CONFIG.giscus</code> 里的几项填上，并把 <code>enabled</code> 改成 <code>true</code></li>
          </ul>
        </div>`;
 

@@ -13,15 +13,7 @@
     />
     <link rel="stylesheet" href="./assets/css/loading.css" />
   </head>
-  <!-- ============================================================
-       加载页（index.html）
-       这一页是进站前的封面。要改的东西主要在两处：
-         ① 下面标了 ★改这里 的文字（站名、英文名、按钮、页脚）
-         ② 轮播的美句：assets/js/data.js 里的 QUOTES
-         ③ 背景大图：assets/img/loading.jpg（换图时把新图改名成 loading.jpg 覆盖即可）
-           想换背景图路径 → assets/css/loading.css 里搜 loading.jpg
-       样式都在 assets/css/loading.css
-       ============================================================ -->
+  <!-- 加载页文案：content/pages/loading-copy.js；轮播句与进度提示：content/pages/loading.js。 详细说明见 content/README.md。 -->
   <body>
     <div class="stage">
       <div class="bg"></div>
@@ -29,19 +21,19 @@
       <div class="dust" id="dust"></div>
 
       <header class="top">
-        <div class="mark">语</div><!-- ★改这里：左上角圆印章里的字，一般取站名第一个字 -->
+        <div class="mark" data-copy="text01">语</div><!-- ★改这里：左上角圆印章里的字，一般取站名第一个字 -->
         <div>
-          <div class="t1">语林集</div><!-- ★改这里：左上角的站点名称 -->
-          <div class="t2">YU LIN JI · 2026</div><!-- ★改这里：名称下面的英文小字，可写成 owner · since 2026 之类 -->
+          <div class="t1" data-copy="text02">语林集</div><!-- ★改这里：左上角的站点名称 -->
+          <div class="t2" data-copy="text03">YU LIN JI · 2026</div><!-- ★改这里：名称下面的英文小字，可写成 owner · since 2026 之类 -->
         </div>
       </header>
 
       <main class="center">
-        <!-- 句子区域：这里的文字只是「第一句」的占位，页面打开后会被 data.js 的 QUOTES 覆盖 -->
+        <!-- 句子区域：这里的文字只是「第一句」的占位，页面打开后会被 content/ 的 QUOTES 覆盖 -->
         <div class="quote" id="quote">
-          <span class="q-mark">“</span>
-          <p class="q-text" id="qText">午后是一天里最宽容的时刻。</p>
-          <p class="q-by" id="qBy">—— 语林集</p>
+          <span class="q-mark" data-copy="text04">“</span>
+          <p class="q-text" id="qText" data-copy="text08">午后是一天里最宽容的时刻。</p>
+          <p class="q-by" id="qBy" data-copy="text09">—— 语林集</p>
         </div>
 
         <div class="loader">
@@ -53,28 +45,47 @@
         </div>
 
         <button class="door" id="door" disabled>
-          <span>推 门 而 入</span><i class="arrow">→</i><!-- ★改这里：进门按钮上的字（字之间加空格会显得更舒展） -->
+          <span data-copy="text05">推 门 而 入</span><i class="arrow">→</i><!-- ★改这里：进门按钮上的字（字之间加空格会显得更舒展） -->
         </button>
         <div class="hint" id="hint">正在准备，请稍候</div>
       </main>
 
       <footer class="bot">
-        <span>© 2026 大大大椰子</span><!-- ★改这里：左下角版权署名 -->
-        <span>喵喵喵？</span><!-- ★改这里：右下角一句话 -->
+        <span data-copy="text06">© 2026 大大大椰子</span><!-- ★改这里：左下角版权署名 -->
+        <span data-copy="text07">喵喵喵？</span><!-- ★改这里：右下角一句话 -->
       </footer>
     </div>
 
     <div class="wipe" id="wipe"></div>
 
-    <script src="./assets/js/data.js"></script>
+    <!-- 内容文件：修改指南见 content/README.md；顺序与 content/files.json 保持一致。 -->
+    <script src="./content/shared/site.js"></script>
+    <script src="./content/shared/profile.js"></script>
+    <script src="./content/shared/navigation.js"></script>
+    <script src="./content/shared/footer.js"></script>
+    <script src="./content/pages/home.js"></script>
+    <script src="./content/pages/loading.js"></script>
+    <script src="./content/pages/about.js"></script>
+    <script src="./content/pages/post.js"></script>
+    <script src="./content/gallery/photos.js"></script>
+    <script src="./content/links/friends.js"></script>
+    <script src="./content/tools/config.js"></script>
+    <script src="./content/tools/food-areas.js"></script>
+    <script src="./content/tools/food-spots.js"></script>
+    <script src="./content/posts/index.js"></script>
+    <script src="./content/posts/richimaj-start.js"></script>
+    <script src="./content/posts/last-ten-minutes.js"></script>
+    <script src="./content/posts/riichimaj-yaku-list.js"></script>
+    <script src="./content/pages/loading-copy.js"></script>
+    <script src="./assets/js/page-copy.js"></script>
     <script src="./assets/js/loading.js"></script>
 
     <!-- ============================================================
          ★ 保险丝（建议保留）
-         作用：万一 data.js 里手滑漏了个逗号或引号，整个脚本会崩，
+         作用：万一 content/ 里手滑漏了个逗号或引号，整个脚本会崩，
                加载页就会一直卡在 0%，把人挡在门外干瞪眼。
                这段脚本独立于上面两个文件单独运行，即使它们报错也会执行：
-               · 发现 data.js 没读进来 → 立刻弹提示，告诉你去查哪里
+               · 发现 content/ 没读进来 → 立刻弹提示，告诉你去查哪里
                · 超过 5 秒还是 0%   → 自动放行进首页，不至于卡死
          网站一切正常时，它什么都不做，不会打扰你。
          ============================================================ -->
@@ -98,11 +109,11 @@
           jumped = true;
           location.href = "./home.html";
         }
-        // ① data.js 或 loading.js 崩了 —— 800ms 就能判断出来
+        // ① content/ 或 loading.js 崩了 —— 800ms 就能判断出来
         setTimeout(function () {
           if (typeof SITE === "undefined" || typeof QUOTES === "undefined") {
             tip(
-              "像是 <b>assets/js/data.js</b> 里有语法错误（大概漏了逗号或引号），<br>" +
+              "像是 <b>content/（见 content/README.md）</b> 里有语法错误（大概漏了逗号或引号），<br>" +
                 "请打开它检查一下最后改动的那几行。<br>5 秒后先放你进去。"
             );
             setTimeout(go, 5000);

@@ -6,6 +6,9 @@
 Thumbs.db
 desktop.ini
 
+# GitHub Pages 发布输出（由 Actions 生成）
+_site/
+
 # Python 缓存
 __pycache__/
 *.pyc

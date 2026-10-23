@@ -1,24 +1,18 @@
-/* 关于页
-   ⚠ 这个文件只负责显示逻辑，内容都来自 data.js：
-       个人介绍 → SITE.bio / SITE.chips
-       能力条   → SKILLS
-       时间轴   → TIMELINE
-       联系方式 → SITE.socials
- */
+/* 页面渲染逻辑；改内容请查 content/README.md。 */
 (() => {
   App.init("about.html");
 
   /* 个人介绍 */
   document.getElementById("profile").innerHTML = `
     <div class="profile-avatar">
-      <img src="${App.esc(SITE.avatar)}" alt="${App.esc(SITE.author)}">
+      <img src="${App.esc(PROFILE.avatar)}" alt="${App.esc(SITE.author)}">
       <div class="profile-badge">${App.esc(SITE.latin)}</div>
     </div>
     <div>
       <h3 class="profile-name">${App.esc(SITE.author)}</h3>
-      <div class="profile-role">${App.esc(SITE.role)}</div>
-      ${SITE.bio.map((t) => `<p class="profile-bio">${App.esc(t)}</p>`).join("")}
-      <div class="chips">${SITE.chips.map((c) => `<span class="chip">${App.esc(c)}</span>`).join("")}</div>
+      <div class="profile-role">${App.esc(PROFILE.role)}</div>
+      ${PROFILE.bio.map((t) => `<p class="profile-bio">${App.esc(t)}</p>`).join("")}
+      <div class="chips">${PROFILE.chips.map((c) => `<span class="chip">${App.esc(c)}</span>`).join("")}</div>
     </div>`;
 
   /* 技能条 */

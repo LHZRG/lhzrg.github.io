@@ -12,15 +12,7 @@
     />
     <link rel="stylesheet" href="./assets/css/main.css" />
   </head>
-  <!-- ============================================================
-       首页
-       这个页面里，带 id 的空容器（#heroLede / #profile / #nowGrid / #postGrid /
-       #homeMasonry / #homeTools / #homeLinks）都不是在本文件里写的 —— 它们由 data.js 的数据自动填。
-       👉 要改那些内容，去 assets/js/data.js，本文件基本不用动。
-
-       本文件里真正能直接改的文字只有下面标了 ★改这里 的几处。
-       导航和页脚也不在这里，在 assets/js/app.js 的 mountNav / mountFooter。
-       ============================================================ -->
+  <!-- 首页文案与栏目设置：content/pages/home.js；共享介绍：content/shared/profile.js。 详细说明见 content/README.md。 -->
   <body>
     <div id="nav"></div><!-- 导航栏由 app.js 自动生成，不用改这里 -->
 
@@ -32,7 +24,7 @@
             <div>
               <span class="hero-tag"><i></i>午后三时 ，此处见</span><!-- ★改这里：标题上方那枚小标签 -->
               <h1>把日子摊开在<em>桌上</em>，<br />让阳光替我读一遍。</h1><!-- ★改这里：首页主标题（<em> 里的字是琥珀色，<br /> 是换行） -->
-              <p class="hero-lede" id="heroLede"></p><!-- 内容来自 data.js 的 SITE.bio 第一段 -->
+              <p class="hero-lede" id="heroLede"></p><!-- 内容来自 content/ 的 SITE.bio 第一段 -->
               <div class="hero-actions">
                 <a class="btn" href="./blog.html">读读新的篇</a><!-- ★改这里：第一个按钮文字 -->
                 <a class="btn ghost" href="./gallery.html">看看照的片</a><!-- ★改这里：第二个按钮文字 -->
@@ -50,7 +42,7 @@
         </div>
       </section>
 
-      <!-- 个人介绍：内容来自 data.js 的 SITE.bio / SITE.chips / SITE.socials -->
+      <!-- 个人介绍：内容来自 content/ 的 SITE.bio / SITE.chips / SITE.socials -->
       <section id="about">
         <div class="wrap">
           <div class="divider-leaf">关 于 我 的</div><!-- ★改这里：栏目标题（字之间加空格更好看） -->
@@ -58,7 +50,7 @@
         </div>
       </section>
 
-      <!-- 此刻：内容来自 data.js 的 NOW（显示几项 → HOME_LAYOUT.now） -->
+      <!-- 此刻：内容来自 content/ 的 NOW（显示几项 → HOME_LAYOUT.now） -->
       <section>
         <div class="wrap">
           <div class="divider-leaf">此 刻</div><!-- ★改这里：栏目标题 -->
@@ -66,7 +58,7 @@
         </div>
       </section>
 
-      <!-- 文章：来自 data.js 的 POSTS（显示几篇、置顶怎么排 → HOME_LAYOUT.posts / order） -->
+      <!-- 文章：来自 content/ 的 POSTS（显示几篇、置顶怎么排 → HOME_LAYOUT.posts / order） -->
       <section>
         <div class="wrap">
           <div class="divider-leaf">写 的 话</div><!-- ★改这里：栏目标题 -->
@@ -80,7 +72,7 @@
         </div>
       </section>
 
-      <!-- 图片：内容来自 data.js 的 GALLERY（首页显示几张、怎么排 → HOME_LAYOUT.gallery） -->
+      <!-- 图片：内容来自 content/ 的 GALLERY（首页显示几张、怎么排 → HOME_LAYOUT.gallery） -->
       <section>
         <div class="wrap">
           <div class="divider-leaf">拍 的 光</div><!-- ★改这里：栏目标题 -->
@@ -94,7 +86,7 @@
         </div>
       </section>
 
-      <!-- 实用工具：三个工具的入口，内容来自 data.js 第 10 段 TOOLS（显示几个 → HOME_LAYOUT.tools） -->
+      <!-- 实用工具：三个工具的入口，内容来自 content/ 对应分类文件中的 TOOLS（显示几个 → HOME_LAYOUT.tools） -->
       <section>
         <div class="wrap">
           <div class="divider-leaf">实 用 工 具</div><!-- ★改这里：栏目标题 -->
@@ -108,7 +100,7 @@
         </div>
       </section>
 
-      <!-- 友链：内容来自 data.js 的 LINKS（首页显示几个、怎么排 → HOME_LAYOUT.links） -->
+      <!-- 友链：内容来自 content/ 的 LINKS（首页显示几个、怎么排 → HOME_LAYOUT.links） -->
       <section>
         <div class="wrap">
           <div class="divider-leaf">友 情 链 接</div><!-- ★改这里：栏目标题 -->
@@ -125,7 +117,24 @@
 
     <div id="footer"></div><!-- 页脚由 app.js 自动生成，不用改这里 -->
 
-    <script src="./assets/js/data.js"></script>
+    <!-- 内容文件：修改指南见 content/README.md；顺序与 content/files.json 保持一致。 -->
+    <script src="./content/shared/site.js"></script>
+    <script src="./content/shared/profile.js"></script>
+    <script src="./content/shared/navigation.js"></script>
+    <script src="./content/shared/footer.js"></script>
+    <script src="./content/pages/home.js"></script>
+    <script src="./content/pages/loading.js"></script>
+    <script src="./content/pages/about.js"></script>
+    <script src="./content/pages/post.js"></script>
+    <script src="./content/gallery/photos.js"></script>
+    <script src="./content/links/friends.js"></script>
+    <script src="./content/tools/config.js"></script>
+    <script src="./content/tools/food-areas.js"></script>
+    <script src="./content/tools/food-spots.js"></script>
+    <script src="./content/posts/index.js"></script>
+    <script src="./content/posts/richimaj-start.js"></script>
+    <script src="./content/posts/last-ten-minutes.js"></script>
+    <script src="./content/posts/riichimaj-yaku-list.js"></script>
     <script src="./assets/js/markdown.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/pages/home.js"></script>

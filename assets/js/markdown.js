@@ -180,6 +180,22 @@ const Markdown = (() => {
   }
 
   function inline(text) {
+    // 把相邻的 <br> 牌行组成紧凑牌河；箭头留在同行，不再被块级牌行挤到远处。
+    const diagrams = [];
+    const diagramPattern = /`[^`]*`|(?:[→←↔⇒⇐]\s*)?\[mj\s+[^\]]*\](?:\s*[→←↔⇒⇐])?(?:\s*<br\s*\/?>\s*(?:[→←↔⇒⇐]\s*)?\[mj\s+[^\]]*\](?:\s*[→←↔⇒⇐])?)*/gi;
+    text = text.replace(diagramPattern, (source) => {
+      if (source.startsWith('`')) return source;
+      const rows = source.split(/\s*<br\s*\/?>\s*/i);
+      const rendered = rows.map((row) => {
+        const match = row.match(/^(.*?)\[mj\s+([^\]]*)\](.*?)$/i);
+        const tiles = mjSet('[mj ' + match[2] + ']');
+        if (!tiles) return esc(row);
+        const mark = (value) => value.trim() ? `<span class="mj-mark">${esc(value.trim())}</span>` : '';
+        return `<span class="mj-line">${mark(match[1])}${tiles}${mark(match[3])}</span>`;
+      }).join('');
+      diagrams.push(rows.length > 1 ? `<span class="mj-stack">${rendered}</span>` : rendered);
+      return '\u0000M' + (diagrams.length - 1) + '\u0000';
+    });
     let s = esc(text);
     // 行内代码先占位，避免被后续规则误伤
     const codes = [];
@@ -221,6 +237,7 @@ const Markdown = (() => {
     });
     // 还原代码
     s = s.replace(/\u0000C(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`);
+    s = s.replace(/\u0000M(\d+)\u0000/g, (_, i) => diagrams[i]);
     return s;
   }
 

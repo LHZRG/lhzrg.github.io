@@ -2727,15 +2727,15 @@ p {
      竖牌 272×389      → 按高度 = --mj-h
      横牌 360×301      → 按宽度 = --mj-h（长边对齐竖牌的高）
      杠图 360×569      → 按宽度 = --mj-h
-   牌与牌之间零间隙、紧贴排列（正文里不写空格即可）；牌组整体垂直居中。 */
+   牌与牌之间零间隙、紧贴排列（正文里不写空格即可）；不同形状以底边对齐，多行牌河零行距。 */
 .prose,
 .wk {
   --mj-h: 36px; /* 竖牌高 = 横牌/杠图的宽，改这一个数全站生效 */
 }
 .mj-row {
   display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-wrap: nowrap;
+  align-items: flex-end;
   gap: 0;
   vertical-align: middle;
   line-height: 0;
@@ -2744,7 +2744,7 @@ p {
 }
 .mj-set {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0;
 }
 /* 面子（| 分隔出来的组）之间留一点缝，一眼能看出「四个面子一对将」。
@@ -2807,9 +2807,46 @@ p {
       行内 flex 会被居中，左边留出一大块空白。
       改成 display:flex 后 text-align 管不到它，justify-content 说了算。 */
 .prose td .mj-row {
-  display: flex;
+  display: inline-flex;
   justify-content: flex-start;
-  margin: 3px 0;
+  margin: 0;
+}
+/* 单行保持自然宽度：箭头像行内文字一样紧贴牌，不占满整个单元格。 */
+.mj-line {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 0;
+  max-width: 100%;
+  vertical-align: middle;
+  line-height: 0;
+  text-align: left;
+}
+.mj-mark {
+  display: inline-block;
+  flex: none;
+  line-height: 1;
+  align-self: center;
+  padding: 0 0.08em;
+}
+/* <br> 连接的牌行，行高至少为一张竖牌；横牌仍在行底，所有行左对齐。 */
+.mj-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  vertical-align: middle;
+  line-height: 0;
+  max-width: 100%;
+}
+.mj-stack > .mj-line {
+  min-height: var(--mj-h);
+  flex: none;
+}
+/* 独立牌图单元格靠左，覆盖合并表格原本的文字居中。 */
+.prose td:has(> .mj-line),
+.prose td:has(> .mj-stack) {
+  text-align: left;
 }
 .prose td .mj-set:first-child {
   margin-left: 0;

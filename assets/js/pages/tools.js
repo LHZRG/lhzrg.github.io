@@ -1,24 +1,11 @@
-/* 实用工具页 · 骰子 / 硬币 / 今天吃什么
-   ---------------------------------------------------------------------------
-   ⚠ 这个文件只管「工具怎么转起来」，内容都在 data.js 第 10 段：
-       工具名字 / 图标 / 说明        → TOOLS
-       骰子几颗、硬币几枚、动画多长  → TOOLS_CONFIG
-       地区 + 校内校外               → FOOD_AREAS
-       餐厅卡片（照片、评价……）      → FOOD_SPOTS
-   ⚠ 想改界面上的按钮文字、提示语，去 tools.html，那里标了 ★改这里。
-   ---------------------------------------------------------------------------
-   下面这段是「硬币两面的图案」，用 SVG 画的：
-     HEAD_SVG —— 正面：一朵盛开的花，花心一个数字 1
-     TAIL_SVG —— 反面：卡通的女皇侧面像（戴小皇冠、后面一个发髻）
-   想换成别的图案，直接替换这两段 SVG 就行（保持 viewBox="0 0 100 100"）。
-   ============================================================================ */
+/* 页面渲染逻辑；改内容请查 content/README.md。 */
 (() => {
   App.init("tools.html");
 
   const esc = App.esc;
   const $ = (s) => document.querySelector(s);
 
-  /* ---------- 读配置（都来自 data.js 第 10-2 段 TOOLS_CONFIG） ---------- */
+  /* ---------- 读配置（都来自 content/ 对应分类文件中的 TOOLS_CONFIG） ---------- */
   const CFG = TOOLS_CONFIG || {};
   const DICE_MAX = Math.max(1, Number(CFG.diceMax) || 10); // 骰子最多几颗
   const DICE_FACES = Math.max(2, Number(CFG.diceFaces) || 6); // 骰子几面
@@ -27,7 +14,7 @@
   const FLIP_MS = Number(CFG.flipMs) || 1100; // 硬币动画时长
   const DRAW_MS = Number(CFG.foodDrawMs) || 700; // 抽卡动画时长
 
-  /* ---------- 把 data.js 里的工具名字 / 图标填到页面上 ---------- */
+  /* ---------- 把 content/ 里的工具名字 / 图标填到页面上 ---------- */
   const TOOL = {};
   (TOOLS || []).forEach((t) => (TOOL[t.id] = t));
   [["dice", "#diceIcon", "#diceName", "#diceDesc"], ["coin", "#coinIcon", "#coinName", "#coinDesc"], ["food", "#foodIcon", "#foodName", "#foodDesc"]].forEach(
@@ -249,7 +236,7 @@
     const area = (FOOD_AREAS || []).find((a) => a.id === curArea);
     foodCount.textContent = n
       ? `${area ? area.name : ""} · ${curZone} 一共有 ${n} 家，抽到哪家算哪家。`
-      : `${area ? area.name : ""} · ${curZone} 这个范围还没填餐厅，去 data.js 第 10-4 段加一家吧。`;
+      : `${area ? area.name : ""} · ${curZone} 这个范围还没填餐厅，去 content/ 对应分类文件中的加一家吧。`;
   }
 
   foodAreaBox.onclick = (e) => {
@@ -361,7 +348,7 @@
   function draw() {
     const pool = spotsIn(curArea, curZone);
     if (!pool.length) {
-      foodSlot.innerHTML = `<div class="food-empty">这个范围还没有餐厅。去 data.js 第 10-4 段 FOOD_SPOTS 加一家（注意 area / zone 要和这里的选项对得上）。</div>`;
+      foodSlot.innerHTML = `<div class="food-empty">这个范围还没有餐厅。去 content/ 对应分类文件中的 FOOD_SPOTS 加一家（注意 area / zone 要和这里的选项对得上）。</div>`;
       return;
     }
     /* 洗牌动画：三张卡背轮流飞一下 */

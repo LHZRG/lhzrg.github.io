@@ -1,7 +1,7 @@
 /* ============================================================
    语林集 · 加载页交互（index.html 用）
    想改的东西基本不在这里：
-     · 轮播的美言美句    → assets/js/data.js 的 QUOTES
+     · 轮播的美言美句    → content/（见 content/README.md） 的 QUOTES
      · 站名 / 英文名      → index.html 的 .t1 / .t2
      · 按钮、光晕、句子样式 → assets/css/loading.css
    这里只有两处文案值得改（下面已标注 ★）
@@ -54,19 +54,12 @@
   }, 5600);
 
   /* ---------- 预加载 & 进度 ---------- */
-  const IMAGES = [...new Set([SITE.heroImage, SITE.avatar, ...GALLERY.map((g) => g.src)])];
+  const IMAGES = [...new Set([HOME.heroImage, PROFILE.avatar, ...GALLERY.map((g) => g.src)])];
   /* ★改这里：进度条下方的加载提示文案。
      格式：[进度百分比, 该进度时显示的文字]，随意增删，句子不用押韵 */
-  const STATUS = [
-    [0, "正在擦亮玻璃…"],
-    [22, "把椅子搬到光里…"],
-    [46, "先泡一杯茉莉花茶…"],
-    [70, "摊开今天的小说…"],
-    [92, "正在组织麻雀…"],
-    [100, "光线刚好，可以进来了喵"],
-  ];
+  const STATUS = LOADING.status;
   const T0 = performance.now();
-  const MIN_MS = 3000; // ★改这里：加载页最短停留时间（毫秒），2400 = 2.4 秒
+  const MIN_MS = LOADING.minMs; // ★改这里：加载页最短停留时间（毫秒），2400 = 2.4 秒
 
   const fill = $("#barFill");
   const pct = $("#pct");
@@ -112,10 +105,10 @@
         clearInterval(tick);
         fill.style.width = "100%";
         pct.textContent = "100%";
-        status.textContent = "光线刚好，可以进来了喵";
+        status.textContent = LOADING.readyText;
         door.disabled = false;
         door.classList.add("ready");
-        hint.textContent = "尝试越过最后的门扉"; // ★改这里：按钮下方那行小提示
+        hint.textContent = LOADING.hint; // ★改这里：按钮下方那行小提示
       }, 420);
     }, wait);
   }

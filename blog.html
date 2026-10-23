@@ -15,30 +15,25 @@
   <body>
     <div id="nav"></div>
 
-    <!-- ============================================================
-         「文章」列表页
-         卡片、标签筛选、年表全部由 data.js 的 POSTS 自动生成，本文件不用改。
-         👉 加 / 删 / 改文章：assets/js/data.js 第 3 段 POSTS
-         下面 ★改这里 的只有几处页面文案。
-         ============================================================ -->
+    <!-- 文章列表文案：content/pages/blog.js；文章：content/posts/（一篇一个文件）。 详细说明见 content/README.md。 -->
     <main style="padding-top: 46px">
       <div class="wrap">
-        <div class="divider-leaf" style="margin-top: 10px">写 的 字</div><!-- ★改这里：栏目标题 -->
+        <div class="divider-leaf" style="margin-top: 10px" data-copy="text01">写 的 字</div><!-- ★改这里：栏目标题 -->
         <div class="sec-head">
           <div>
-            <h2 class="sec-title">全部文章</h2><!-- ★改这里：标题 -->
+            <h2 class="sec-title" data-copy="text02">全部文章</h2><!-- ★改这里：标题 -->
             <p style="color: var(--ink-3); font-size: 14px; margin: 6px 0 0">
               共 <b id="totalNum">0</b> 篇，想看多久就看多久喵。<!-- ★改这里：副标题（篇数自动填） -->
             </p>
           </div>
           <div class="view-switch">
-            <button class="filter-chip on" data-view="grid">卡片</button><!-- ★改这里：卡片视图按钮名 -->
-            <button class="filter-chip" data-view="year">年表</button><!-- ★改这里：年表视图按钮名 -->
+            <button class="filter-chip on" data-view="grid" data-copy="text03">卡片</button><!-- ★改这里：卡片视图按钮名 -->
+            <button class="filter-chip" data-view="year" data-copy="text04">年表</button><!-- ★改这里：年表视图按钮名 -->
           </div>
         </div>
 
         <div class="filter-bar">
-          <span id="tagBar" style="display: contents"></span><!-- ← 标签按钮自动生成，标签写在 data.js 每篇文章的 tags 里 -->
+          <span id="tagBar" style="display: contents"></span><!-- ← 标签按钮自动生成，标签写在 content/ 每篇文章的 tags 里 -->
           <label class="inline-search">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
             <input id="q" type="text" placeholder="在这一页里找找…" /><!-- ★改这里：搜索框里的提示语 -->
@@ -47,13 +42,32 @@
 
         <div class="post-grid" id="postGrid"></div><!-- ← 卡片视图容器 -->
         <div id="archive" hidden></div><!-- ← 年表视图容器 -->
-        <div class="empty-note" id="empty" hidden>没有找到匹配的文章，换个词试试吧？</div><!-- ★改这里：搜不到时显示的话 -->
+        <div class="empty-note" id="empty" hidden data-copy="text05">没有找到匹配的文章，换个词试试吧？</div><!-- ★改这里：搜不到时显示的话 -->
       </div>
     </main>
 
     <div id="footer"></div>
 
-    <script src="./assets/js/data.js"></script>
+    <!-- 内容文件：修改指南见 content/README.md；顺序与 content/files.json 保持一致。 -->
+    <script src="./content/shared/site.js"></script>
+    <script src="./content/shared/profile.js"></script>
+    <script src="./content/shared/navigation.js"></script>
+    <script src="./content/shared/footer.js"></script>
+    <script src="./content/pages/home.js"></script>
+    <script src="./content/pages/loading.js"></script>
+    <script src="./content/pages/about.js"></script>
+    <script src="./content/pages/post.js"></script>
+    <script src="./content/gallery/photos.js"></script>
+    <script src="./content/links/friends.js"></script>
+    <script src="./content/tools/config.js"></script>
+    <script src="./content/tools/food-areas.js"></script>
+    <script src="./content/tools/food-spots.js"></script>
+    <script src="./content/posts/index.js"></script>
+    <script src="./content/posts/richimaj-start.js"></script>
+    <script src="./content/posts/last-ten-minutes.js"></script>
+    <script src="./content/posts/riichimaj-yaku-list.js"></script>
+    <script src="./content/pages/blog.js"></script>
+    <script src="./assets/js/page-copy.js"></script>
     <script src="./assets/js/markdown.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/pages/blog.js"></script>

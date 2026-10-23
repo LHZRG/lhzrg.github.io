@@ -1,12 +1,4 @@
-/* 友链页
-   ⚠ 这个文件只负责卡片的显示逻辑，不含友链本身。
-     加删友链去 data.js 的 LINKS（那里也写着每个字段是干什么的）。
-     右下角「复制邮箱」按钮读的是 data.js 里 SITE.socials 中邮箱那一项。
-
-   交互：点卡片 → 弹出详情窗格（快照 / 评价 / 跳转按钮）
-         卡片刻意不直接跳转，避免误点；想跳转就点弹窗底部的按钮，
-         或者对卡片右键「在新标签页打开」。
- */
+/* 页面渲染逻辑；改内容请查 content/README.md。 */
 (() => {
   const { linkModal } = App.init("links.html");
 
@@ -23,7 +15,7 @@
     </a>`;
 
   /* 排序规则和首页一致：置顶在前，其余按 added（加入时间）排。
-     ★ 想改顺序 → data.js 第 9 段 HOME_LAYOUT.order / dateDesc
+     ★ 想改顺序 → content/ 对应分类文件中的 HOME_LAYOUT.order / dateDesc
      ★ 想让某个友链排最前 → LINKS 里给它写 pinned: true
      这个页面显示全部友链，不受 HOME_LAYOUT.links 数量限制 */
   const list = App.sortItems(LINKS, (l) => l.added || l.known || "");

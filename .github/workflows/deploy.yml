@@ -19,10 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 打包站点
-        run: |
-          mkdir -p _site
-          cp -r index.html home.html blog.html post.html gallery.html links.html about.html 404.html rss.xml .nojekyll assets _site/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 打包站点并生成缓存版本
+        run: python tools/build-site.py --version "${{ github.sha }}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

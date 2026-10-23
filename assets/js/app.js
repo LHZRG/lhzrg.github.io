@@ -1,25 +1,4 @@
-/* ============================================================
-   语林集 · 公共逻辑
-   导航 / 页脚 / 主题 / 搜索 / 灯箱 / 光影 / 进场动画
-
-   ⚠ 这个文件是「管长相和结构」的，不是管内容的。
-     网站内容（文章、照片、友链、自我介绍）都在 assets/js/data.js 里改。
-   ⚠ 全站只有两个地方写了硬编码文字：下面的【导航菜单】和【页脚】，
-     因为它们每个页面都一样、几乎不用改。已标 ★改这里。
-   ⚠ 改配色请去 assets/css/main.css 顶部的 :root 变量，不要来这里。
-
-   各段落索引（想改什么找哪一段）：
-     ① mountAmbient   背景的两团柔光、从加载页过来的那一道光
-     ② mountNav       ★导航菜单（站名、菜单项、图标）
-     ③ 主题           日光 / 灯下切换
-     ④ mountFooter    ★页脚三栏内容
-     ⑤ mountSearch    Ctrl+K 全站搜索面板
-     ⑥ mountLightbox  图片点开看大图
-     ⑦ mountToTop     回到顶部按钮 + 顶部阅读进度条
-     ⑧ reveal         往下滚动时内容浮现的动画
-     ⑨ sortItems      栏目排序（置顶 + 时间），首页 / 图片页 / 友链页共用
-     ⑩ postCard       文章卡片的样式模板
-   ============================================================ */
+/* 公共渲染逻辑。内容入口：content/README.md；导航与页脚：content/shared/。 */
 
 const App = (() => {
   /* ---------- 小工具 ---------- */
@@ -115,14 +94,7 @@ const App = (() => {
        · 想加一项：在这个数组里加一行，同时要在项目里新建一个同名 html 文件
        · 想减一项：删掉那一行
        · 想改顺序：调整行的先后顺序 */
-    const items = [
-      ["home.html", "首页"],
-      ["blog.html", "文章"],
-      ["gallery.html", "图片"],
-      ["tools.html", "工具"], // ← 实用工具（骰子 / 硬币 / 今天吃什么）
-      ["links.html", "友链"],
-      ["about.html", "关于"],
-    ];
+    const items = NAVIGATION;
     const el = $("#nav");
     if (!el) return;
     /* ⚠ 这个 .nav 类是直接加在页面里那个 <div id="nav"> 上的，不要再往里套一层 div。
@@ -211,7 +183,7 @@ const App = (() => {
   function mountFooter() {
     const el = $("#footer");
     if (!el) return;
-    // 「本站已亮灯 X 天」是按 data.js 里 SITE.since 的日期自动算出来的
+    // 「本站已亮灯 X 天」是按 content/ 里 SITE.since 的日期自动算出来的
     const days = Math.max(
       0,
       Math.floor((Date.now() - new Date(SITE.since.replace(/-/g, "/")).getTime()) / 86400000)
@@ -224,42 +196,37 @@ const App = (() => {
       <div class="wrap">
         <div class="footer-grid">
           <div>
-            <h4>${esc(SITE.name)} · ${esc(SITE.latin)}</h4><!-- 左栏：站名 + 英文名，来自 data.js 的 SITE -->
-            <p>${esc(SITE.heroQuote)}</p><!-- 主标语，来自 data.js 的 SITE.heroQuote -->
-            <p style="font-size:13px;color:var(--ink-3)">午后斜阳里的小馆</p><!-- ★改这里：站名下那行小字 -->
+            <h4>${esc(SITE.name)} · ${esc(SITE.latin)}</h4><!-- 左栏：站名 + 英文名，来自 content/ 的 SITE -->
+            <p>${esc(SITE.footerQuote)}</p><!-- 主标语，来自 content/ 的 SITE.footerQuote -->
+            <p style="font-size:13px;color:var(--ink-3)">${esc(FOOTER.subtitle)}</p><!-- ★改这里：站名下那行小字 -->
           </div>
           <div>
-            <h4>栏目</h4><!-- ★改这里：中栏标题 -->
+            <h4>${esc(FOOTER.columnsTitle)}</h4><!-- ★改这里：中栏标题 -->
             <ul><!-- ★改这里：中栏链接，和导航菜单保持一致比较好 -->
-              <li><a href="./home.html">回到首页</a></li>
-              <li><a href="./blog.html">全部文章</a></li>
-              <li><a href="./gallery.html">图片墙</a></li>
-              <li><a href="./tools.html">实用工具</a></li>
-              <li><a href="./links.html">友情链接</a></li>
-              <li><a href="./about.html">关于我</a></li>
+${FOOTER.links.map(([url, label]) => `<li><a href="./${esc(url)}">${esc(label)}</a></li>`).join("")}
             </ul>
           </div>
           <div>
-            <h4>找到我</h4><!-- ★改这里：右栏标题 -->
+            <h4>${esc(FOOTER.contactTitle)}</h4><!-- ★改这里：右栏标题 -->
             <ul>
-              <!-- 联系方式自动生成，改地址去 data.js 的 SITE.socials -->
+              <!-- 联系方式自动生成，改地址去 content/ 的 SITE.socials -->
               ${SITE.socials
                 .map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a></li>`)
                 .join("")}
-              <li><a href="./links.html#apply">交换友链</a></li><!-- ★改这里：右栏最后一项 -->
+              <li><a href="./links.html#apply">${esc(FOOTER.exchange)}</a></li><!-- ★改这里：右栏最后一项 -->
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
           <span>© ${new Date().getFullYear()} ${esc(SITE.author)} · 本站已亮灯 ${days} 天</span><!-- 年份和天数自动算 -->
-          <span>由木头、阳光和一点点 JavaScript 搭成</span><!-- ★改这里：右下角一句话 -->
+          <span>${esc(FOOTER.credit)}</span><!-- ★改这里：右下角一句话 -->
         </div>
       </div>
       </div>`;
   }
 
   /* ---------- ⑤ 全站搜索（Ctrl+K 或点放大镜） ---------- */
-  // 搜的是 data.js 里所有文章的标题 / 摘要 / 标签 / 正文，加文章会自动被搜到
+  // 搜的是 content/ 里所有文章的标题 / 摘要 / 标签 / 正文，加文章会自动被搜到
   function mountSearch() {
     document.body.insertAdjacentHTML(
       "beforeend",
@@ -284,7 +251,7 @@ const App = (() => {
     /* 搜索索引只建一次。
        以前是每敲一个字就把所有文章的正文重新解析一遍纯文本，
        文章一多输入就卡；现在开面板时建好，之后只做字符串匹配。
-       （文章是在 data.js 里写死的，页面不刷新就不会变，缓存是安全的） */
+       （文章是在 content/ 里写死的，页面不刷新就不会变，缓存是安全的） */
     let index = null;
     const buildIndex = () =>
       index ||
@@ -426,7 +393,7 @@ const App = (() => {
      右侧：站名 / 站长 / 评价 / 标签 / 认识时间 / 状态
      底部：「点击跳转」按钮
      关闭：点窗格外、点右上角叉、按 ESC
-     数据结构见 data.js 第 5 段 LINKS
+     数据结构见 content/ 对应分类文件中的 LINKS
   ------------------------------------------------------------------ */
   function mountLinkModal() {
     document.body.insertAdjacentHTML(
@@ -501,7 +468,7 @@ const App = (() => {
       const shot = $("#lmShot", modal);
       shot.innerHTML = l.snap
         ? `<img src="${esc(l.snap)}" alt="${esc(l.name)} 的首页快照" loading="lazy">`
-        : `<div class="lm-noshot"><b>还没有快照</b><span>截图后填进 data.js 的 snap 字段</span></div>`;
+        : `<div class="lm-noshot"><b>还没有快照</b><span>截图后填进 content/ 的 snap 字段</span></div>`;
       shot.classList.toggle("is-empty", !l.snap);
 
       $("#lmSnapDate", modal).innerHTML = l.snapDate
@@ -609,7 +576,7 @@ const App = (() => {
   }
 
   /* ---------- ⑨ 栏目排序：置顶 + 时间（首页 / 图片页 / 友链页共用） ----------
-     怎么排由 data.js 第 9 段 HOME_LAYOUT 决定，不用改这里：
+     怎么排由 content/ 对应分类文件中的 HOME_LAYOUT 决定，不用改这里：
        order:    "pinned-first"   置顶的排最前，其余按时间排（默认）
                  "unpinned-first" 未置顶的排最前，置顶的排后面
                  "date-first"     只看时间，不管置顶与否
@@ -637,7 +604,7 @@ const App = (() => {
   }
 
   /* ---------- ⑩ 文章卡片模板（首页、文章列表页共用） ---------- */
-  // 里面用到的数据全都来自 data.js 里那一篇文章的字段：cover / date / title / excerpt / tags
+  // 里面用到的数据全都来自 content/ 里那一篇文章的字段：cover / date / title / excerpt / tags
   function postCard(p) {
     return `
       <a class="post-card reveal" href="${postUrl(p.id)}">

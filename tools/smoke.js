@@ -6,20 +6,12 @@
  */
 const { JSDOM, VirtualConsole } = require("jsdom");
 
-/* ---- 先读一遍 data.js，所有期望值都跟着数据走 ----
+/* ---- 先读一遍 content/，所有期望值都跟着数据走 ----
    这样你增删文章 / 照片 / 友链 / 联系方式之后，测试不会误报。
-   如果 data.js 本身有语法错误（漏逗号之类），这里会直接告诉你。 */
+   如果 content/ 本身有语法错误（漏逗号之类），这里会直接告诉你。 */
 const DATA = (() => {
   try {
-    const src = require("fs").readFileSync(
-      require("path").join(__dirname, "..", "assets", "js", "data.js"),
-      "utf8"
-    );
-    // 用 new Function 包一层，比 eval + 替换 const 更稳（也不会误伤文件内容）
-    const D = new Function(
-      src +
-        "\nreturn ({SITE,POSTS,QUOTES,GALLERY,LINKS,TIMELINE,NOW,SKILLS,HOME_LAYOUT,TOOLS,TOOLS_CONFIG,FOOD_AREAS,FOOD_SPOTS});"
-    )();
+    const D = require("./load-content").load();
     const tags = new Set();
     D.POSTS.forEach((p) => (p.tags || []).forEach((t) => tags.add(t)));
     /* 文章页测「列表里第一篇」：以后增删文章、改标题，测试都跟着走，不会写死 */
@@ -30,7 +22,7 @@ const DATA = (() => {
     /* 找一篇含表格的条目式文章（比如 wiki 体例的役种表），测它的表格渲染 */
     const wiki = D.POSTS.find((p) => {
       const b = typeof p.body === "string" ? p.body : (p.body || []).join("\n");
-      return /\|\s*-{3,}/.test(b);
+      return /\|\s*-{3,}/.test(b) && b.includes(":::infobox") && b.includes(":::cat");
     });
     const L = D.HOME_LAYOUT || {};
     const cnt = (k, all) => {
@@ -67,7 +59,7 @@ const DATA = (() => {
       galleryPlaceholder: Number(L.gallery) > 0 && Number(L.gallery) < D.GALLERY.length ? 0 : 1,
     };
   } catch (e) {
-    console.log("❌ data.js 读不了：" + e.message + "\n   先把 data.js 修好再跑测试。\n");
+    console.log("❌ content/ 读不了：" + e.message + "\n   先把 content/ 修好再跑测试。\n");
     return { ok: false };
   }
 })();
@@ -126,7 +118,7 @@ const PAGES = [
     ["目录项", d.querySelectorAll("#toc a").length, DATA.firstToc],
     ["上下篇", d.querySelectorAll("#postNav a").length, 2],
     ["相关文章", d.querySelectorAll("#related .post-card").length > 0, true],
-    /* 评论区：在 data.js 里打开了 Giscus 就是一段远程 script，没打开就是「还没通电」的说明卡 */
+    /* 评论区：在 content/ 里打开了 Giscus 就是一段远程 script，没打开就是「还没通电」的说明卡 */
     ["评论区", DATA.giscus
       ? /giscus\.app\/client\.js/.test(d.querySelector("#giscus").innerHTML)
       : d.querySelector("#giscus").textContent.trim().length > 10, true],

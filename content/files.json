@@ -1,0 +1,19 @@
+[
+  "shared/site.js",
+  "shared/profile.js",
+  "shared/navigation.js",
+  "shared/footer.js",
+  "pages/home.js",
+  "pages/loading.js",
+  "pages/about.js",
+  "pages/post.js",
+  "gallery/photos.js",
+  "links/friends.js",
+  "tools/config.js",
+  "tools/food-areas.js",
+  "tools/food-spots.js",
+  "posts/index.js",
+  "posts/richimaj-start.js",
+  "posts/last-ten-minutes.js",
+  "posts/riichimaj-yaku-list.js"
+]

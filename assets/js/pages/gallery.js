@@ -1,7 +1,4 @@
-/* 图片墙
-   ⚠ 这个文件只负责瀑布流和大图查看的显示逻辑，不含照片本身。
-     加删照片去 data.js 的 GALLERY（图片本体放进 assets/img/）。
- */
+/* 页面渲染逻辑；改内容请查 content/README.md。 */
 (() => {
   const { lightbox } = App.init("gallery.html");
 
@@ -9,7 +6,7 @@
   document.getElementById("shotNum").textContent = GALLERY.length;
 
   /* 排序规则和首页一致：置顶在前，其余按时间。
-     ★ 想改顺序 → data.js 第 9 段 HOME_LAYOUT.order / dateDesc
+     ★ 想改顺序 → content/ 对应分类文件中的 HOME_LAYOUT.order / dateDesc
      ★ 想让某张照片排最前 → GALLERY 里给它写 pinned: true
      这个页面显示全部照片，不受 HOME_LAYOUT.gallery 数量限制 */
   const shots = App.sortItems(GALLERY);

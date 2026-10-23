@@ -15,29 +15,25 @@
   <body>
     <div id="nav"></div>
 
-    <!-- ============================================================
-         「图片」相册页
-         照片全部来自 data.js 第 4 段 GALLERY。
-         👉 加 / 删照片：data.js 的 GALLERY（图片本体放 assets/img/ 文件夹）
-         ============================================================ -->
+    <!-- 图片页文案：content/pages/gallery.js；照片：content/gallery/photos.js。 详细说明见 content/README.md。 -->
     <main style="padding-top: 46px">
       <div class="wrap">
-        <div class="divider-leaf" style="margin-top: 10px">拍 的 光</div><!-- ★改这里：栏目标题 -->
+        <div class="divider-leaf" style="margin-top: 10px" data-copy="text01">拍 的 光</div><!-- ★改这里：栏目标题 -->
         <div class="sec-head">
           <div>
-            <h2 class="sec-title">图片墙</h2><!-- ★改这里：标题 -->
+            <h2 class="sec-title" data-copy="text02">图片墙</h2><!-- ★改这里：标题 -->
             <p style="color: var(--ink-3); font-size: 14px; margin: 6px 0 0">
               共 <b id="shotNum">0</b> 张 · 点开可放大，用 ← → 翻页，ESC 退出<!-- ★改这里：副标题（张数自动填） -->
             </p>
           </div>
-          <button class="more-link" id="shuffle">随机看一张</button><!-- ★改这里：右上角按钮文字 -->
+          <button class="more-link" id="shuffle" data-copy="text03">随机看一张</button><!-- ★改这里：右上角按钮文字 -->
         </div>
 
-        <div class="masonry" id="galleryGrid"></div><!-- ← 瀑布流，数据来自 data.js 的 GALLERY -->
+        <div class="masonry" id="galleryGrid"></div><!-- ← 瀑布流，数据来自 content/ 的 GALLERY -->
 
         <div class="note-card" style="margin-top: 34px">
-          <h3>关于这些照片</h3><!-- ★改这里：卡片标题 -->
-          <p style="margin: 0">
+          <h3 data-copy="text04">关于这些照片</h3><!-- ★改这里：卡片标题 -->
+          <p style="margin: 0" data-copy="text05">
             <!-- ★改这里：照片说明，随便改成你自己的拍摄心得 -->
             众所周知，光是什么样的，照片就是什么样的。
           </p>
@@ -47,7 +43,26 @@
 
     <div id="footer"></div>
 
-    <script src="./assets/js/data.js"></script>
+    <!-- 内容文件：修改指南见 content/README.md；顺序与 content/files.json 保持一致。 -->
+    <script src="./content/shared/site.js"></script>
+    <script src="./content/shared/profile.js"></script>
+    <script src="./content/shared/navigation.js"></script>
+    <script src="./content/shared/footer.js"></script>
+    <script src="./content/pages/home.js"></script>
+    <script src="./content/pages/loading.js"></script>
+    <script src="./content/pages/about.js"></script>
+    <script src="./content/pages/post.js"></script>
+    <script src="./content/gallery/photos.js"></script>
+    <script src="./content/links/friends.js"></script>
+    <script src="./content/tools/config.js"></script>
+    <script src="./content/tools/food-areas.js"></script>
+    <script src="./content/tools/food-spots.js"></script>
+    <script src="./content/posts/index.js"></script>
+    <script src="./content/posts/richimaj-start.js"></script>
+    <script src="./content/posts/last-ten-minutes.js"></script>
+    <script src="./content/posts/riichimaj-yaku-list.js"></script>
+    <script src="./content/pages/gallery.js"></script>
+    <script src="./assets/js/page-copy.js"></script>
     <script src="./assets/js/markdown.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/pages/gallery.js"></script>

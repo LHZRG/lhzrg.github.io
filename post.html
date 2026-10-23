@@ -15,13 +15,7 @@
   <body>
     <div id="nav"></div>
 
-    <!-- ============================================================
-         「文章详情」页（post.html）
-         ★ 这个页面几乎不用动：所有文章的正文都从网址里的 id 去 data.js 取，
-           例如 post.html?id=afternoon-light 就显示那篇文章。
-         👉 写文章、改文章：assets/js/data.js 第 3 段 POSTS
-         👉 开评论区：data.js 第 1 段 SITE.giscus
-         ============================================================ -->
+    <!-- 文章正文：content/posts/；评论设置：content/pages/post.js。 详细说明见 content/README.md。 -->
     <main>
       <article id="article">
         <header class="article-head narrow">
@@ -42,14 +36,31 @@
           <div class="post-nav" id="postNav"></div><!-- ← 上一篇 / 下一篇，自动算 -->
 
           <section id="related" style="margin-top: 48px"></section><!-- ← 相关文章（按共同标签推荐） -->
-          <div class="giscus-wrap" id="giscus"></div><!-- ← 评论区，在 data.js 的 SITE.giscus 里开启 -->
+          <div class="giscus-wrap" id="giscus"></div><!-- ← 评论区，在 content/ 的 SITE.giscus 里开启 -->
         </div>
       </article>
     </main>
 
     <div id="footer"></div>
 
-    <script src="./assets/js/data.js"></script>
+    <!-- 内容文件：修改指南见 content/README.md；顺序与 content/files.json 保持一致。 -->
+    <script src="./content/shared/site.js"></script>
+    <script src="./content/shared/profile.js"></script>
+    <script src="./content/shared/navigation.js"></script>
+    <script src="./content/shared/footer.js"></script>
+    <script src="./content/pages/home.js"></script>
+    <script src="./content/pages/loading.js"></script>
+    <script src="./content/pages/about.js"></script>
+    <script src="./content/pages/post.js"></script>
+    <script src="./content/gallery/photos.js"></script>
+    <script src="./content/links/friends.js"></script>
+    <script src="./content/tools/config.js"></script>
+    <script src="./content/tools/food-areas.js"></script>
+    <script src="./content/tools/food-spots.js"></script>
+    <script src="./content/posts/index.js"></script>
+    <script src="./content/posts/richimaj-start.js"></script>
+    <script src="./content/posts/last-ten-minutes.js"></script>
+    <script src="./content/posts/riichimaj-yaku-list.js"></script>
     <script src="./assets/js/markdown.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/pages/post.js"></script>
